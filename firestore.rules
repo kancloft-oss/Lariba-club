@@ -1,0 +1,180 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() && (
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) &&
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin') ||
+        (request.auth.token.email == "admin@lariba.local") ||
+        (request.auth.token.email == "kancloft@gmail.com" && request.auth.token.email_verified == true)
+      );
+    }
+
+    function isRicher(userId) {
+      return exists(/databases/$(database)/documents/users/$(userId)) &&
+             get(/databases/$(database)/documents/users/$(userId)).data.tariff == 'Richer';
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+    function isValidUser(data) {
+      return hasOnlyAllowedFields(['uid', 'login', 'name', 'role', 'tariff', 'guildId', 'paymentStatus', 'paymentDueDate', 'createdAt', 'avatarUrl']) &&
+             data.uid is string && data.uid.size() > 0 && data.uid.size() < 100 &&
+             data.login is string && data.login.size() > 0 && data.login.size() < 100 &&
+             data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
+             data.role in ['admin', 'resident'] &&
+             data.tariff in ['Moneycan', 'Lemoner', 'Richer', 'None'] &&
+             data.paymentStatus in ['paid', 'unpaid'] &&
+             data.createdAt is string &&
+             (!('guildId' in data) || data.guildId == null || (data.guildId is string && data.guildId.size() < 100)) &&
+             (!('paymentDueDate' in data) || data.paymentDueDate == null || (data.paymentDueDate is string && data.paymentDueDate.size() < 100)) &&
+             (!('avatarUrl' in data) || data.avatarUrl == null || (data.avatarUrl is string && data.avatarUrl.size() < 1048576));
+    }
+
+    function isValidEvent(data) {
+      return hasOnlyAllowedFields(['title', 'description', 'date', 'tariffs', 'createdAt']) &&
+             data.title is string && data.title.size() > 0 && data.title.size() < 200 &&
+             data.description is string && data.description.size() < 2000 &&
+             data.date is string && data.date.size() < 100 &&
+             data.tariffs is list && data.tariffs.size() <= 3 &&
+             data.createdAt is string;
+    }
+
+    function isValidCode(data) {
+      return hasOnlyAllowedFields(['title', 'description', 'residentId', 'createdAt', 'deadline', 'frequencyType', 'schedule', 'totalRequired', 'completedCount', 'completionHistory', 'status', 'completedAt']) &&
+             data.title is string && data.title.size() > 0 && data.title.size() < 200 &&
+             data.description is string && data.description.size() < 2000 &&
+             data.residentId is string && data.residentId.size() > 0 && data.residentId.size() < 100 &&
+             data.createdAt is string &&
+             data.deadline is string && data.deadline.size() < 100 &&
+             data.frequencyType in ['daily', 'everyOtherDay', 'weekly', 'once'] &&
+             (!('schedule' in data) || data.schedule is list) &&
+             data.totalRequired is number && data.totalRequired > 0 &&
+             data.completedCount is number && data.completedCount >= 0 &&
+             data.completionHistory is list &&
+             (!('status' in data) || data.status in ['pending', 'completed']) &&
+             (!('completedAt' in data) || data.completedAt is string);
+    }
+
+    function isValidGuild(data) {
+      return hasOnlyAllowedFields(['name', 'score', 'createdAt']) &&
+             data.name is string && data.name.size() > 0 && data.name.size() < 100 &&
+             data.score is number &&
+             data.createdAt is string;
+    }
+
+    function isValidMonthlyScore(data) {
+      return hasOnlyAllowedFields(['score', 'monthId', 'lastUpdated']) &&
+             data.score is number &&
+             data.monthId is string && data.monthId.size() == 7 &&
+             data.lastUpdated is string;
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+    
+    match /users/{userId} {
+      // Admins can read all users. Users can read their own data.
+      // Richer users can read other users to see guild members.
+      allow read: if isAuthenticated() && (isAdmin() || isOwner(userId) || isRicher(request.auth.uid));
+      
+      // Only admins can create or update users (except users updating their own non-privileged fields, but here we'll let admins handle it all for simplicity, or let users update their own name)
+      allow create: if isAdmin() && isValidUser(request.resource.data) && request.resource.data.uid == userId;
+      
+      // Allow user to update their own name and avatar, but not role/tariff/payment
+      allow update: if isAuthenticated() && isValidUser(request.resource.data) && (
+        isAdmin() || 
+        (isOwner(userId) && 
+         request.resource.data.role == resource.data.role &&
+         request.resource.data.tariff == resource.data.tariff &&
+         request.resource.data.paymentStatus == resource.data.paymentStatus &&
+         request.resource.data.get('paymentDueDate', null) == resource.data.get('paymentDueDate', null) &&
+         request.resource.data.get('guildId', null) == resource.data.get('guildId', null) &&
+         request.resource.data.uid == resource.data.uid &&
+         request.resource.data.createdAt == resource.data.createdAt)
+      );
+      
+      allow delete: if isAdmin();
+    }
+
+    match /events/{eventId} {
+      // Any authenticated user can read events (filtering by tariff is done client-side or via query)
+      allow read: if isAuthenticated();
+      allow create: if isAdmin() && isValidEvent(request.resource.data);
+      allow update: if isAdmin() && isValidEvent(request.resource.data);
+      allow delete: if isAdmin();
+    }
+
+    match /codes/{codeId} {
+      // Users can read their own codes. Admins can read all codes. Richer users can read codes of their guild members (we'll allow Richer to read all codes for simplicity, or just let them query).
+      allow read: if isAuthenticated() && (isAdmin() || resource.data.residentId == request.auth.uid || isRicher(request.auth.uid));
+      
+      // Admins create codes
+      allow create: if isAdmin() && isValidCode(request.resource.data);
+      
+      // Users can update their own code progress
+      allow update: if isAuthenticated() && isValidCode(request.resource.data) && (
+        isAdmin() ||
+        (resource.data.residentId == request.auth.uid &&
+         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['completedCount', 'completionHistory']) &&
+         (
+           (request.resource.data.completedCount == resource.data.completedCount + 1 &&
+            request.resource.data.completionHistory.size() == resource.data.completionHistory.size() + 1) ||
+           (request.resource.data.completedCount == resource.data.completedCount - 1 &&
+            request.resource.data.completionHistory.size() == resource.data.completionHistory.size() - 1)
+         )
+        )
+      );
+      
+      allow delete: if isAdmin();
+    }
+
+    match /guilds/{guildId} {
+      // All authenticated users can read guilds (to see rankings)
+      allow read: if isAuthenticated();
+      allow create: if isAdmin() && isValidGuild(request.resource.data);
+      allow update: if isAuthenticated() && (
+        isAdmin() ||
+        (isAuthenticated() && 
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.guildId == guildId &&
+         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['score']))
+      );
+      allow delete: if isAdmin();
+
+      match /monthly_scores/{monthId} {
+        allow read: if isAuthenticated();
+        allow create: if isAuthenticated() && (
+          isAdmin() ||
+          (isAuthenticated() && 
+           get(/databases/$(database)/documents/users/$(request.auth.uid)).data.guildId == guildId &&
+           isValidMonthlyScore(request.resource.data))
+        );
+        allow update: if isAuthenticated() && (
+          isAdmin() ||
+          (isAuthenticated() && 
+           get(/databases/$(database)/documents/users/$(request.auth.uid)).data.guildId == guildId &&
+           isValidMonthlyScore(request.resource.data) &&
+           request.resource.data.diff(resource.data).affectedKeys().hasOnly(['score', 'lastUpdated']))
+        );
+      }
+    }
+  }
+}

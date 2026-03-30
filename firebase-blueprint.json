@@ -1,0 +1,95 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "A resident or admin of the LARIBA business club.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "login": { "type": "string" },
+        "name": { "type": "string" },
+        "role": { "type": "string", "enum": ["admin", "resident"] },
+        "tariff": { "type": "string", "enum": ["Moneycan", "Lemoner", "Richer", "None"] },
+        "guildId": { "type": "string" },
+        "paymentStatus": { "type": "string", "enum": ["paid", "unpaid"] },
+        "paymentDueDate": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "login", "name", "role", "tariff", "paymentStatus", "createdAt"]
+    },
+    "Event": {
+      "title": "Event",
+      "description": "An event in the club calendar.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "date": { "type": "string", "format": "date-time" },
+        "tariffs": {
+          "type": "array",
+          "items": { "type": "string", "enum": ["Moneycan", "Lemoner", "Richer"] }
+        },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "description", "date", "tariffs", "createdAt"]
+    },
+    "Code": {
+      "title": "Code",
+      "description": "A task or goal assigned to a resident.",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "residentId": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "completed"] },
+        "completedAt": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["title", "description", "residentId", "status", "createdAt"]
+    },
+    "Guild": {
+      "title": "Guild",
+      "description": "A group of Richer residents.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "score": { "type": "number", "description": "Total all-time score." },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "score", "createdAt"]
+    },
+    "GuildMonthlyScore": {
+      "title": "GuildMonthlyScore",
+      "description": "Monthly score for a guild.",
+      "type": "object",
+      "properties": {
+        "score": { "type": "number" },
+        "monthId": { "type": "string", "description": "Format: YYYY-MM" },
+        "lastUpdated": { "type": "string", "format": "date-time" }
+      },
+      "required": ["score", "monthId", "lastUpdated"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "Stores user profiles."
+    },
+    "/events/{eventId}": {
+      "schema": { "$ref": "#/entities/Event" },
+      "description": "Stores club events."
+    },
+    "/codes/{codeId}": {
+      "schema": { "$ref": "#/entities/Code" },
+      "description": "Stores resident codes (tasks)."
+    },
+    "/guilds/{guildId}": {
+      "schema": { "$ref": "#/entities/Guild" },
+      "description": "Stores guilds for Richer residents."
+    },
+    "/guilds/{guildId}/monthly_scores/{monthId}": {
+      "schema": { "$ref": "#/entities/GuildMonthlyScore" },
+      "description": "Stores monthly scores for a guild."
+    }
+  }
+}
