@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { collection, onSnapshot, query, where, doc, updateDoc } from 'firebase/firestore';
-import { db, handleFirestoreError, OperationType } from '../../firebase';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { db, storage, handleFirestoreError, OperationType } from '../../firebase';
 import { useAuth } from '../../contexts/AuthContext';
 import { Event } from '../admin/AdminEvents';
 import { Code } from '../admin/AdminCodes';
@@ -68,21 +69,56 @@ export default function ResidentHome() {
     const file = e.target.files?.[0];
     if (!file || !userProfile) return;
 
-    if (file.size > 1024 * 1024) {
-      alert('Размер файла не должен превышать 1МБ');
+    if (file.size > 10 * 1024 * 1024) {
+      alert('Размер файла не должен превышать 10МБ');
       return;
     }
 
     const reader = new FileReader();
     reader.onloadend = async () => {
-      const base64String = reader.result as string;
-      try {
-        await updateDoc(doc(db, 'users', userProfile.uid), {
-          avatarUrl: base64String
-        });
-      } catch (err) {
-        handleFirestoreError(err, OperationType.UPDATE, `users/${userProfile.uid}`);
-      }
+      const img = new Image();
+      img.onload = async () => {
+        const canvas = document.createElement('canvas');
+        const maxSize = 200;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > maxSize) {
+            height *= maxSize / width;
+            width = maxSize;
+          }
+        } else {
+          if (height > maxSize) {
+            width *= maxSize / height;
+            height = maxSize;
+          }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, width, height);
+        
+        canvas.toBlob(async (blob) => {
+          if (!blob) return;
+
+          try {
+            const avatarRef = ref(storage, `avatars/${userProfile.uid}`);
+            await uploadBytes(avatarRef, blob);
+            const downloadURL = await getDownloadURL(avatarRef);
+
+            await updateDoc(doc(db, 'users', userProfile.uid), {
+              avatarUrl: downloadURL
+            });
+          } catch (err) {
+            console.error('Avatar upload error:', err);
+            // We need to handle storage errors too, but handleFirestoreError is for firestore.
+            // For now, let's just alert.
+            alert('Ошибка при загрузке аватара');
+          }
+        }, 'image/jpeg', 0.7);
+      };
+      img.src = reader.result as string;
     };
     reader.readAsDataURL(file);
   };
