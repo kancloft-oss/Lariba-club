@@ -45,7 +45,16 @@ export default function AdminStatistics() {
   }, [filteredUsers]);
 
   const exportToExcel = () => {
-    const ws = XLSX.utils.json_to_sheet(filteredUsers);
+    // Limit data to avoid exceeding Excel cell/text limits
+    const safeData = filteredUsers.map(user => ({
+      Имя: user.name,
+      Логин: user.login,
+      Тариф: user.tariff,
+      Статус: user.paymentStatus,
+      Дата_оплаты: user.paymentDueDate || 'Нет',
+      Создан: user.createdAt
+    }));
+    const ws = XLSX.utils.json_to_sheet(safeData);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Residents');
     XLSX.writeFile(wb, 'residents_statistics.xlsx');

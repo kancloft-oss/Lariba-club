@@ -28,6 +28,7 @@ export default function AdminUsers() {
   const [paymentStatus, setPaymentStatus] = useState<'paid' | 'unpaid'>('unpaid');
   const [paymentDueDate, setPaymentDueDate] = useState('');
   const [error, setError] = useState('');
+  const [newPassword, setNewPassword] = useState(''); // New state for password change
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'users'), (snapshot) => {
@@ -49,6 +50,7 @@ export default function AdminUsers() {
     setPaymentDueDate('');
     setError('');
     setEditingUser(null);
+    setNewPassword('');
   };
 
   const handleOpenModal = (user?: UserProfile) => {
@@ -83,6 +85,18 @@ export default function AdminUsers() {
           paymentStatus,
           paymentDueDate: paymentDueDate || null
         });
+
+        if (newPassword) {
+          // Admin SDK is needed to update password directly.
+          // Since we don't have admin SDK, we must inform the user.
+          // Alternatively, we can use the secondaryAuth to sign in if we have credentials,
+          // but we don't have the user's current password.
+          // The only way to change password without current password is via admin SDK.
+          // We will log this limitation.
+          console.warn('Direct password update by admin is not supported via client SDK.');
+          setError('Прямая смена пароля администратором невозможна через клиентский SDK. Используйте сброс пароля.');
+          return;
+        }
       } else {
         const emailForAuth = login.toLowerCase() + '@lariba.local';
         const userCredential = await createUserWithEmailAndPassword(secondaryAuth, emailForAuth, password);
@@ -132,11 +146,13 @@ export default function AdminUsers() {
   };
 
   const handleResetPassword = async (email: string) => {
+    console.log('Resetting password for:', email.toLowerCase() + '@lariba.local');
     if (window.confirm('Вы уверены, что хотите отправить письмо для сброса пароля этому резиденту?')) {
       try {
         await sendPasswordResetEmail(auth, email.toLowerCase() + '@lariba.local');
         alert('Письмо для сброса пароля отправлено.');
       } catch (err: any) {
+        console.error('Password reset error:', err);
         setError('Ошибка при отправке письма: ' + err.message);
       }
     }
@@ -314,6 +330,12 @@ export default function AdminUsers() {
                 </div>
                 {error && <div className="mb-5 p-3 bg-rose-50 text-sm text-rose-600 rounded-xl border border-rose-100">{error}</div>}
                 <form onSubmit={handleSubmit} className="space-y-4">
+                  {editingUser && (
+                    <div>
+                      <label className="block text-sm font-medium text-zinc-700 mb-1.5">Новый пароль (оставьте пустым, если не нужно менять)</label>
+                      <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className="block w-full border border-zinc-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-zinc-900 focus:border-zinc-900 sm:text-sm transition-all" />
+                    </div>
+                  )}
                   {!editingUser && (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
