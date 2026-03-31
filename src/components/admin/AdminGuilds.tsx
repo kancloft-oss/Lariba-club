@@ -143,10 +143,10 @@ export default function AdminGuilds() {
   return (
     <div className="space-y-6 pb-20 md:pb-0">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h2 className="text-2xl font-bold text-zinc-900 tracking-tight">Управление гильдиями</h2>
+        <h2 className="text-2xl font-bold text-brand-white tracking-tight">Управление гильдиями</h2>
         <button
           onClick={() => handleOpenModal()}
-          className="w-full sm:w-auto bg-zinc-900 text-white px-5 py-2.5 rounded-xl flex items-center justify-center space-x-2 hover:bg-zinc-800 transition-colors shadow-sm"
+          className="w-full sm:w-auto bg-brand-white text-brand-black px-5 py-2.5 rounded-xl flex items-center justify-center space-x-2 hover:bg-gray-200 transition-colors shadow-sm"
         >
           <Plus size={20} />
           <span className="font-medium">Добавить гильдию</span>
@@ -158,15 +158,15 @@ export default function AdminGuilds() {
           const members = richerUsers.filter(u => u.guildId === guild.id);
           const monthlyScore = guildMonthlyScores[guild.id] || 0;
           return (
-            <div key={guild.id} className="bg-white rounded-2xl shadow-sm border border-zinc-200 overflow-hidden flex flex-col">
+            <div key={guild.id} className="bg-[#111] rounded-2xl shadow-sm border border-zinc-800 overflow-hidden flex flex-col">
               <div className="p-6 flex-1">
                 <div className="flex justify-between items-start mb-6">
                   <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 bg-zinc-100 rounded-xl flex items-center justify-center">
-                      <Shield className="w-6 h-6 text-zinc-700" />
+                    <div className="w-12 h-12 bg-zinc-800/50 rounded-xl flex items-center justify-center">
+                      <Shield className="w-6 h-6 text-zinc-300" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold text-zinc-900 leading-tight">{guild.name}</h3>
+                      <h3 className="text-lg font-bold text-brand-white leading-tight">{guild.name}</h3>
                       <div className="flex flex-col mt-1">
                         <div className="flex items-center text-sm font-medium text-amber-600">
                           <Trophy size={14} className="mr-1" />
@@ -179,13 +179,13 @@ export default function AdminGuilds() {
                     </div>
                   </div>
                   <div className="flex space-x-1">
-                    <button onClick={() => { setEditingGuild(guild); setIsMembersModalOpen(true); }} className="p-2 text-zinc-400 hover:text-zinc-900 bg-zinc-50 hover:bg-zinc-100 rounded-lg transition-colors" title="Управление участниками">
+                    <button onClick={() => { setEditingGuild(guild); setIsMembersModalOpen(true); }} className="p-2 text-zinc-400 hover:text-brand-white bg-brand-black hover:bg-gray-200/50 rounded-lg transition-colors" title="Управление участниками">
                       <Users size={18} />
                     </button>
-                    <button onClick={() => handleOpenModal(guild)} className="p-2 text-zinc-400 hover:text-zinc-900 bg-zinc-50 hover:bg-zinc-100 rounded-lg transition-colors" title="Редактировать">
+                    <button onClick={() => handleOpenModal(guild)} className="p-2 text-zinc-400 hover:text-brand-white bg-brand-black hover:bg-gray-200/50 rounded-lg transition-colors" title="Редактировать">
                       <Edit2 size={18} />
                     </button>
-                    <button onClick={() => handleDelete(guild.id)} className="p-2 text-zinc-400 hover:text-rose-600 bg-zinc-50 hover:bg-rose-50 rounded-lg transition-colors" title="Удалить">
+                    <button onClick={() => handleDelete(guild.id)} className="p-2 text-zinc-400 hover:text-rose-600 bg-brand-black hover:bg-rose-50 rounded-lg transition-colors" title="Удалить">
                       <Trash2 size={18} />
                     </button>
                   </div>
@@ -193,20 +193,20 @@ export default function AdminGuilds() {
                 
                 <div>
                   <div className="flex justify-between items-center mb-3">
-                    <h4 className="text-sm font-bold text-zinc-900">Участники</h4>
-                    <span className="text-xs font-medium text-zinc-500 bg-zinc-100 px-2 py-1 rounded-md">{members.length}/12</span>
+                    <h4 className="text-sm font-bold text-brand-white">Участники</h4>
+                    <span className="text-xs font-medium text-zinc-400 bg-zinc-800/50 px-2 py-1 rounded-md">{members.length}/12</span>
                   </div>
-                  <div className="bg-zinc-50/50 rounded-xl p-3 max-h-48 overflow-y-auto border border-zinc-100">
+                  <div className="bg-brand-black/50 rounded-xl p-3 max-h-48 overflow-y-auto border border-zinc-800/50">
                     {members.length === 0 ? (
-                      <p className="text-sm text-zinc-500 italic text-center py-4">Нет участников</p>
+                      <p className="text-sm text-zinc-400 italic text-center py-4">Нет участников</p>
                     ) : (
                       <ul className="space-y-2">
                         {members.map(member => (
-                          <li key={member.uid} className="flex justify-between items-center text-sm bg-white p-2 rounded-lg border border-zinc-100 shadow-sm">
-                            <span className="font-medium text-zinc-900 truncate pr-2">{member.name}</span>
+                          <li key={member.uid} className="flex justify-between items-center text-sm bg-[#111] p-2 rounded-lg border border-zinc-800/50 shadow-sm">
+                            <span className="font-medium text-brand-white truncate pr-2">{member.name}</span>
                             <button 
                               onClick={() => handleAssignMember(member.uid, null)}
-                              className="text-xs font-medium text-rose-600 hover:text-rose-700 bg-rose-50 px-2 py-1 rounded-md transition-colors whitespace-nowrap"
+                              className="text-xs font-medium text-rose-400 hover:text-rose-300 bg-rose-900/20 px-2 py-1 rounded-md transition-colors whitespace-nowrap border border-rose-900/50"
                             >
                               Удалить
                             </button>
@@ -227,35 +227,35 @@ export default function AdminGuilds() {
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex items-end sm:items-center justify-center min-h-screen p-4 text-center sm:p-0">
             <div className="fixed inset-0 transition-opacity" aria-hidden="true" onClick={handleCloseModal}>
-              <div className="absolute inset-0 bg-zinc-900/40 backdrop-blur-sm"></div>
+              <div className="absolute inset-0 bg-brand-white/40 backdrop-blur-sm"></div>
             </div>
-            <div className="relative z-10 inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full w-full">
-              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+            <div className="relative z-10 inline-block align-bottom bg-[#111] rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full w-full">
+              <div className="bg-[#111] px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                 <div className="flex justify-between items-center mb-5">
-                  <h3 className="text-xl font-bold text-zinc-900 tracking-tight">
+                  <h3 className="text-xl font-bold text-brand-white tracking-tight">
                     {editingGuild ? 'Редактировать гильдию' : 'Новая гильдия'}
                   </h3>
-                  <button onClick={handleCloseModal} className="text-zinc-400 hover:text-zinc-600 bg-zinc-100 p-1.5 rounded-full transition-colors">
+                  <button onClick={handleCloseModal} className="text-zinc-400 hover:text-zinc-400 bg-zinc-800/50 p-1.5 rounded-full transition-colors">
                     <X size={20} />
                   </button>
                 </div>
-                {error && <div className="mb-5 p-3 bg-rose-50 text-sm text-rose-600 rounded-xl border border-rose-100">{error}</div>}
+                {error && <div className="mb-5 p-3 bg-rose-900/20 text-sm text-rose-400 rounded-xl border border-rose-900/50">{error}</div>}
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-zinc-700 mb-1.5">Название</label>
-                    <input type="text" required value={name} onChange={(e) => setName(e.target.value)} className="block w-full border border-zinc-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-zinc-900 focus:border-zinc-900 sm:text-sm transition-all" />
+                    <label className="block text-sm font-medium text-zinc-300 mb-1.5">Название</label>
+                    <input type="text" required value={name} onChange={(e) => setName(e.target.value)} className="block w-full border border-zinc-800 bg-brand-black text-brand-white rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-brand-white focus:border-brand-white sm:text-sm transition-all" />
                   </div>
-                  <div className="bg-zinc-50 p-4 rounded-xl border border-zinc-100">
-                    <p className="text-xs text-zinc-500 flex items-center">
+                  <div className="bg-brand-black p-4 rounded-xl border border-zinc-800/50">
+                    <p className="text-xs text-zinc-400 flex items-center">
                       <Trophy size={14} className="mr-2 text-amber-500" />
                       Очки гильдии теперь рассчитываются автоматически на основе достижений участников.
                     </p>
                   </div>
-                  <div className="mt-8 sm:flex sm:flex-row-reverse gap-3 pt-4 border-t border-zinc-100">
-                    <button type="submit" className="w-full sm:w-auto inline-flex justify-center items-center rounded-xl border border-transparent px-6 py-2.5 bg-zinc-900 text-sm font-medium text-white hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-zinc-900 transition-colors shadow-sm">
+                  <div className="mt-8 sm:flex sm:flex-row-reverse gap-3 pt-4 border-t border-zinc-800/50">
+                    <button type="submit" className="w-full sm:w-auto inline-flex justify-center items-center rounded-xl border border-transparent px-6 py-2.5 bg-brand-white text-sm font-medium text-brand-black hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-white transition-colors shadow-sm">
                       {editingGuild ? 'Сохранить' : 'Создать'}
                     </button>
-                    <button type="button" onClick={handleCloseModal} className="mt-3 sm:mt-0 w-full sm:w-auto inline-flex justify-center items-center rounded-xl border border-zinc-200 px-6 py-2.5 bg-white text-sm font-medium text-zinc-700 hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-zinc-900 transition-colors">
+                    <button type="button" onClick={handleCloseModal} className="mt-3 sm:mt-0 w-full sm:w-auto inline-flex justify-center items-center rounded-xl border border-zinc-800 px-6 py-2.5 bg-[#111] text-sm font-medium text-zinc-300 hover:bg-brand-black focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-white transition-colors">
                       Отмена
                     </button>
                   </div>
@@ -271,34 +271,34 @@ export default function AdminGuilds() {
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex items-end sm:items-center justify-center min-h-screen p-4 text-center sm:p-0">
             <div className="fixed inset-0 transition-opacity" aria-hidden="true" onClick={() => { setIsMembersModalOpen(false); setEditingGuild(null); }}>
-              <div className="absolute inset-0 bg-zinc-900/40 backdrop-blur-sm"></div>
+              <div className="absolute inset-0 bg-brand-white/40 backdrop-blur-sm"></div>
             </div>
-            <div className="relative z-10 inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full w-full">
-              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+            <div className="relative z-10 inline-block align-bottom bg-[#111] rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full w-full">
+              <div className="bg-[#111] px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                 <div className="flex justify-between items-center mb-5">
-                  <h3 className="text-xl font-bold text-zinc-900 tracking-tight">
+                  <h3 className="text-xl font-bold text-brand-white tracking-tight">
                     Участники: {editingGuild.name}
                   </h3>
-                  <button onClick={() => { setIsMembersModalOpen(false); setEditingGuild(null); }} className="text-zinc-400 hover:text-zinc-600 bg-zinc-100 p-1.5 rounded-full transition-colors">
+                  <button onClick={() => { setIsMembersModalOpen(false); setEditingGuild(null); }} className="text-zinc-400 hover:text-zinc-400 bg-zinc-800/50 p-1.5 rounded-full transition-colors">
                     <X size={20} />
                   </button>
                 </div>
                 
                 <div className="mt-4">
-                  <h4 className="text-sm font-bold text-zinc-900 mb-3">Доступные резиденты (Richer)</h4>
-                  <div className="bg-zinc-50/50 rounded-xl p-2 sm:p-4 max-h-[60vh] overflow-y-auto border border-zinc-200">
+                  <h4 className="text-sm font-bold text-brand-white mb-3">Доступные резиденты (Richer)</h4>
+                  <div className="bg-brand-black/50 rounded-xl p-2 sm:p-4 max-h-[60vh] overflow-y-auto border border-zinc-800">
                     <ul className="space-y-2">
                       {richerUsers.map(user => (
-                        <li key={user.uid} className="p-3 sm:p-4 bg-white rounded-xl border border-zinc-100 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                        <li key={user.uid} className="p-3 sm:p-4 bg-[#111] rounded-xl border border-zinc-800/50 shadow-sm flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                           <div>
-                            <p className="text-sm font-bold text-zinc-900">{user.name}</p>
-                            <p className="text-xs font-medium text-zinc-500 mt-0.5">@{user.login}</p>
+                            <p className="text-sm font-bold text-brand-white">{user.name}</p>
+                            <p className="text-xs font-medium text-zinc-400 mt-0.5">@{user.login}</p>
                           </div>
                           <div className="w-full sm:w-auto">
                             {user.guildId === editingGuild.id ? (
                               <button 
                                 onClick={() => handleAssignMember(user.uid, null)}
-                                className="w-full sm:w-auto px-4 py-2 bg-rose-50 text-rose-700 rounded-lg text-sm font-medium hover:bg-rose-100 transition-colors"
+                                className="w-full sm:w-auto px-4 py-2 bg-rose-900/20 text-rose-400 rounded-lg text-sm font-medium hover:bg-rose-900/40 transition-colors border border-rose-900/50"
                               >
                                 Удалить
                               </button>
@@ -306,7 +306,7 @@ export default function AdminGuilds() {
                               <button 
                                 onClick={() => handleAssignMember(user.uid, editingGuild.id)}
                                 disabled={richerUsers.filter(u => u.guildId === editingGuild.id).length >= 12}
-                                className="w-full sm:w-auto px-4 py-2 bg-zinc-900 text-white rounded-lg text-sm font-medium hover:bg-zinc-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                className="w-full sm:w-auto px-4 py-2 bg-brand-white text-brand-black rounded-lg text-sm font-medium hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                               >
                                 {user.guildId ? 'Переместить сюда' : 'Добавить'}
                               </button>

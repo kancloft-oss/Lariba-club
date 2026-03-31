@@ -3,6 +3,7 @@ import { collection, onSnapshot, doc, setDoc, deleteDoc, updateDoc } from 'fireb
 import { db, handleFirestoreError, OperationType } from '../../firebase';
 import { Plus, Edit2, Trash2, X, Calendar as CalendarIcon } from 'lucide-react';
 import { Tariff } from '../../contexts/AuthContext';
+import { TariffBadge } from '../TariffBadge';
 
 export interface Event {
   id: string;
@@ -123,10 +124,10 @@ export default function AdminEvents() {
   return (
     <div className="space-y-6 pb-20 md:pb-0">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h2 className="text-2xl font-bold text-zinc-900 tracking-tight">Мероприятия</h2>
+        <h2 className="text-2xl font-bold text-brand-white tracking-tight">Мероприятия</h2>
         <button
           onClick={() => handleOpenModal()}
-          className="w-full sm:w-auto bg-zinc-900 text-white px-5 py-2.5 rounded-xl flex items-center justify-center space-x-2 hover:bg-zinc-800 transition-colors shadow-sm"
+          className="w-full sm:w-auto bg-brand-white text-brand-black px-5 py-2.5 rounded-xl flex items-center justify-center space-x-2 hover:bg-gray-200 transition-colors shadow-sm"
         >
           <Plus size={20} />
           <span className="font-medium">Добавить мероприятие</span>
@@ -135,10 +136,10 @@ export default function AdminEvents() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {events.map((event) => (
-          <div key={event.id} className="bg-white rounded-3xl shadow-sm border border-zinc-200 overflow-hidden flex flex-col transition-all hover:shadow-md">
+          <div key={event.id} className="bg-[#111] rounded-3xl shadow-sm border border-zinc-800 overflow-hidden flex flex-col transition-all hover:shadow-md">
             <div className="p-6 flex-1 flex flex-col">
               <div className="flex justify-between items-start mb-4">
-                <div className="flex items-center space-x-2 text-zinc-500 bg-zinc-50 px-3 py-1.5 rounded-lg w-fit">
+                <div className="flex items-center space-x-2 text-zinc-400 bg-brand-black px-3 py-1.5 rounded-lg w-fit">
                   <CalendarIcon size={16} />
                   <span className="text-sm font-medium">
                     {new Date(event.date).toLocaleDateString('ru-RU', {
@@ -149,28 +150,23 @@ export default function AdminEvents() {
                   </span>
                 </div>
                 <div className="flex space-x-1">
-                  <button onClick={() => handleOpenModal(event)} className="p-2 text-zinc-400 hover:text-zinc-900 bg-zinc-50 hover:bg-zinc-100 rounded-lg transition-colors">
+                  <button onClick={() => handleOpenModal(event)} className="p-2 text-zinc-400 hover:text-brand-white bg-brand-black hover:bg-gray-200/50 rounded-lg transition-colors">
                     <Edit2 size={16} />
                   </button>
-                  <button onClick={() => handleDelete(event.id)} className="p-2 text-zinc-400 hover:text-rose-600 bg-zinc-50 hover:bg-rose-50 rounded-lg transition-colors">
+                  <button onClick={() => handleDelete(event.id)} className="p-2 text-zinc-400 hover:text-rose-600 bg-brand-black hover:bg-rose-50 rounded-lg transition-colors">
                     <Trash2 size={16} />
                   </button>
                 </div>
               </div>
               
-              <h3 className="text-xl font-bold text-zinc-900 mb-2">{event.title}</h3>
-              <p className="text-zinc-600 text-sm flex-1 line-clamp-3 mb-6">{event.description}</p>
+              <h3 className="text-xl font-bold text-brand-white mb-2">{event.title}</h3>
+              <p className="text-zinc-400 text-sm flex-1 line-clamp-3 mb-6">{event.description}</p>
               
-              <div className="mt-auto pt-4 border-t border-zinc-100">
+              <div className="mt-auto pt-4 border-t border-zinc-800/50">
                 <p className="text-xs font-medium text-zinc-400 uppercase tracking-wider mb-2">Доступно для</p>
                 <div className="flex flex-wrap gap-2">
                   {event.tariffs.map(t => (
-                    <span key={t} className={`px-2.5 py-1 text-xs font-semibold rounded-full 
-                      ${t === 'Richer' ? 'bg-purple-100 text-purple-700' : 
-                        t === 'Lemoner' ? 'bg-yellow-100 text-yellow-700' : 
-                        'bg-emerald-100 text-emerald-700'}`}>
-                      {t}
-                    </span>
+                    <TariffBadge key={t} tariff={t} />
                   ))}
                 </div>
               </div>
@@ -184,54 +180,54 @@ export default function AdminEvents() {
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex items-end sm:items-center justify-center min-h-screen p-4 text-center sm:p-0">
             <div className="fixed inset-0 transition-opacity" aria-hidden="true" onClick={handleCloseModal}>
-              <div className="absolute inset-0 bg-zinc-900/40 backdrop-blur-sm"></div>
+              <div className="absolute inset-0 bg-brand-white/40 backdrop-blur-sm"></div>
             </div>
-            <div className="relative z-10 inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full w-full">
-              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+            <div className="relative z-10 inline-block align-bottom bg-[#111] rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full w-full">
+              <div className="bg-[#111] px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                 <div className="flex justify-between items-center mb-5">
-                  <h3 className="text-xl font-bold text-zinc-900 tracking-tight">
+                  <h3 className="text-xl font-bold text-brand-white tracking-tight">
                     {editingEvent ? 'Редактировать мероприятие' : 'Новое мероприятие'}
                   </h3>
-                  <button onClick={handleCloseModal} className="text-zinc-400 hover:text-zinc-600 bg-zinc-100 p-1.5 rounded-full transition-colors">
+                  <button onClick={handleCloseModal} className="text-zinc-400 hover:text-zinc-400 bg-zinc-800/50 p-1.5 rounded-full transition-colors">
                     <X size={20} />
                   </button>
                 </div>
-                {error && <div className="mb-5 p-3 bg-rose-50 text-sm text-rose-600 rounded-xl border border-rose-100">{error}</div>}
+                {error && <div className="mb-5 p-3 bg-rose-900/20 text-sm text-rose-400 rounded-xl border border-rose-900/50">{error}</div>}
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-zinc-700 mb-1.5">Название</label>
-                    <input type="text" required value={title} onChange={(e) => setTitle(e.target.value)} className="block w-full border border-zinc-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-zinc-900 focus:border-zinc-900 sm:text-sm transition-all" />
+                    <label className="block text-sm font-medium text-zinc-300 mb-1.5">Название</label>
+                    <input type="text" required value={title} onChange={(e) => setTitle(e.target.value)} className="block w-full border border-zinc-800 bg-brand-black text-brand-white rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-brand-white focus:border-brand-white sm:text-sm transition-all" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-zinc-700 mb-1.5">Описание</label>
-                    <textarea required value={description} onChange={(e) => setDescription(e.target.value)} rows={4} className="block w-full border border-zinc-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-zinc-900 focus:border-zinc-900 sm:text-sm transition-all resize-none" />
+                    <label className="block text-sm font-medium text-zinc-300 mb-1.5">Описание</label>
+                    <textarea required value={description} onChange={(e) => setDescription(e.target.value)} rows={4} className="block w-full border border-zinc-800 bg-brand-black text-brand-white rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-brand-white focus:border-brand-white sm:text-sm transition-all resize-none" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-zinc-700 mb-1.5">Дата</label>
-                    <input type="date" required value={date} onChange={(e) => setDate(e.target.value)} className="block w-full border border-zinc-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-zinc-900 focus:border-zinc-900 sm:text-sm transition-all" />
+                    <label className="block text-sm font-medium text-zinc-300 mb-1.5">Дата</label>
+                    <input type="date" required value={date} onChange={(e) => setDate(e.target.value)} className="block w-full border border-zinc-800 bg-brand-black text-brand-white rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-brand-white focus:border-brand-white sm:text-sm transition-all" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-zinc-700 mb-2">Доступно для тарифов</label>
+                    <label className="block text-sm font-medium text-zinc-300 mb-2">Доступно для тарифов</label>
                     <div className="flex flex-wrap gap-3">
                       {['Moneycan', 'Lemoner', 'Richer'].map((t) => (
-                        <label key={t} className="flex items-center cursor-pointer bg-zinc-50 px-3 py-2 rounded-lg border border-zinc-200 hover:bg-zinc-100 transition-colors">
+                        <label key={t} className="flex items-center cursor-pointer bg-brand-black px-3 py-2 rounded-lg border border-zinc-800 hover:bg-gray-200/50 transition-colors">
                           <input
                             type="checkbox"
                             checked={selectedTariffs.includes(t as Tariff)}
                             onChange={() => handleTariffToggle(t as Tariff)}
-                            className="h-4 w-4 text-zinc-900 focus:ring-zinc-900 border-zinc-300 rounded cursor-pointer"
+                            className="h-4 w-4 text-brand-white focus:ring-zinc-900 border-zinc-700 rounded cursor-pointer"
                           />
-                          <span className="ml-2 text-sm font-medium text-zinc-700">{t}</span>
+                          <span className="ml-2 text-sm font-medium text-zinc-300">{t}</span>
                         </label>
                       ))}
                     </div>
                   </div>
                   
-                  <div className="mt-8 sm:flex sm:flex-row-reverse gap-3 pt-4 border-t border-zinc-100">
-                    <button type="submit" className="w-full sm:w-auto inline-flex justify-center items-center rounded-xl border border-transparent px-6 py-2.5 bg-zinc-900 text-sm font-medium text-white hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-zinc-900 transition-colors shadow-sm">
+                  <div className="mt-8 sm:flex sm:flex-row-reverse gap-3 pt-4 border-t border-zinc-800/50">
+                    <button type="submit" className="w-full sm:w-auto inline-flex justify-center items-center rounded-xl border border-transparent px-6 py-2.5 bg-brand-white text-sm font-medium text-brand-black hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-zinc-900 transition-colors shadow-sm">
                       {editingEvent ? 'Сохранить' : 'Создать'}
                     </button>
-                    <button type="button" onClick={handleCloseModal} className="mt-3 sm:mt-0 w-full sm:w-auto inline-flex justify-center items-center rounded-xl border border-zinc-200 px-6 py-2.5 bg-white text-sm font-medium text-zinc-700 hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-zinc-900 transition-colors">
+                    <button type="button" onClick={handleCloseModal} className="mt-3 sm:mt-0 w-full sm:w-auto inline-flex justify-center items-center rounded-xl border border-zinc-800 px-6 py-2.5 bg-[#111] text-sm font-medium text-zinc-300 hover:bg-brand-black focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-zinc-900 transition-colors">
                       Отмена
                     </button>
                   </div>

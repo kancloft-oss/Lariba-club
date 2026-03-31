@@ -1,11 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { collection, onSnapshot, query, where, doc, updateDoc, getDocs, increment } from 'firebase/firestore';
+import React, { useState, useEffect } from 'react';
+import { collection, onSnapshot, query, where, doc, updateDoc } from 'firebase/firestore';
 import { db, handleFirestoreError, OperationType } from '../../firebase';
 import { useAuth } from '../../contexts/AuthContext';
 import { Event } from '../admin/AdminEvents';
 import { Code } from '../admin/AdminCodes';
 import { Guild } from '../admin/AdminGuilds';
-import { Calendar as CalendarIcon, Clock, CheckCircle2, Trophy, Camera, Shield } from 'lucide-react';
+import { Calendar as CalendarIcon, CheckCircle2, Trophy, Camera, Shield } from 'lucide-react';
+import { TariffBadge } from '../TariffBadge';
 
 import { updateGuildScore } from '../../utils/guildScores';
 
@@ -15,40 +16,6 @@ export default function ResidentHome() {
   const [codes, setCodes] = useState<Code[]>([]);
   const [myGuild, setMyGuild] = useState<Guild | null>(null);
   const [guildRank, setGuildRank] = useState<number | null>(null);
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [currentMonth, setCurrentMonth] = useState(new Date());
-
-  const changeMonth = (offset: number) => {
-    setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + offset, 1));
-  };
-
-  const getDaysInMonth = (date: Date) => {
-    const year = date.getFullYear();
-    const month = date.getMonth();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const firstDay = new Date(year, month, 1).getDay();
-    const days = [];
-    
-    // Previous month days
-    const prevMonthLastDay = new Date(year, month, 0).getDate();
-    const startDay = firstDay === 0 ? 6 : firstDay - 1;
-    for (let i = startDay - 1; i >= 0; i--) {
-      days.push({ date: new Date(year, month - 1, prevMonthLastDay - i), isCurrentMonth: false });
-    }
-    
-    // Current month days
-    for (let i = 1; i <= daysInMonth; i++) {
-      days.push({ date: new Date(year, month, i), isCurrentMonth: true });
-    }
-    
-    // Next month days
-    const remainingDays = 42 - days.length;
-    for (let i = 1; i <= remainingDays; i++) {
-      days.push({ date: new Date(year, month + 1, i), isCurrentMonth: false });
-    }
-    
-    return days;
-  };
 
   // Fetch Events
   useEffect(() => {
@@ -119,14 +86,6 @@ export default function ResidentHome() {
     reader.readAsDataURL(file);
   };
 
-  const isSameDay = (d1: Date, d2: Date) => {
-    return d1.getFullYear() === d2.getFullYear() &&
-           d1.getMonth() === d2.getMonth() &&
-           d1.getDate() === d2.getDate();
-  };
-
-  const selectedDateEvents = events.filter(event => isSameDay(new Date(event.date), selectedDate));
-  
   const totalCodes = codes.length;
   const completedCodesSum = codes.filter(c => c.completedCount >= c.totalRequired).length;
   const progress = totalCodes > 0 ? Math.round((completedCodesSum / totalCodes) * 100) : 0;
@@ -170,98 +129,57 @@ export default function ResidentHome() {
     }
   };
 
-  const getDayName = (date: Date) => {
-    return date.toLocaleDateString('ru-RU', { weekday: 'short' }).toUpperCase();
-  };
-
   return (
     <div className="max-w-md mx-auto pb-24 space-y-8 font-sans">
       
       {/* Profile Header */}
-      <div className="bg-white rounded-3xl p-6 shadow-sm border border-zinc-100 flex items-center space-x-5">
+      <div className="bg-[#111] rounded-3xl p-6 shadow-sm border border-zinc-800/50 flex items-center space-x-5">
         <div className="relative">
-          <div className="w-20 h-20 rounded-full bg-zinc-100 border-2 border-white shadow-md overflow-hidden flex items-center justify-center">
+          <div className="w-20 h-20 rounded-full bg-zinc-800/50 border-2 border-white shadow-md overflow-hidden flex items-center justify-center">
             {userProfile?.avatarUrl ? (
               <img src={userProfile.avatarUrl} alt="Avatar" className="w-full h-full object-cover" />
             ) : (
               <span className="text-2xl font-bold text-zinc-400">{userProfile?.name.charAt(0)}</span>
             )}
           </div>
-          <label className="absolute bottom-0 right-0 w-7 h-7 bg-zinc-900 rounded-full flex items-center justify-center cursor-pointer shadow-lg border-2 border-white hover:bg-zinc-800 transition-colors">
-            <Camera size={12} className="text-white" />
+          <label className="absolute bottom-0 right-0 w-7 h-7 bg-brand-white rounded-full flex items-center justify-center cursor-pointer shadow-lg border-2 border-white hover:bg-gray-200 transition-colors">
+            <Camera size={12} className="text-brand-black" />
             <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
           </label>
         </div>
         <div className="flex-1">
-          <h2 className="text-xl font-bold text-zinc-900 leading-tight">{userProfile?.name}</h2>
-          <p className="text-sm text-zinc-500 mt-0.5">@{userProfile?.login}</p>
-          <div className="mt-2 inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-zinc-100 text-zinc-700">
-            {userProfile?.tariff}
-          </div>
+          <h2 className="text-xl font-bold text-brand-white leading-tight">{userProfile?.name}</h2>
+          <p className="text-sm text-zinc-400 mt-0.5 mb-2">@{userProfile?.login}</p>
+          {userProfile?.tariff && <TariffBadge tariff={userProfile.tariff} />}
         </div>
       </div>
 
-      {/* iOS Style Calendar */}
-      <div className="bg-white rounded-3xl p-6 shadow-sm border border-zinc-100 space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-bold text-zinc-900">
-            {currentMonth.toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' })}
-          </h3>
-          <div className="flex space-x-2">
-            <button onClick={() => changeMonth(-1)} className="p-2 rounded-full hover:bg-zinc-100">{'<'}</button>
-            <button onClick={() => changeMonth(1)} className="p-2 rounded-full hover:bg-zinc-100">{'>'}</button>
-          </div>
+      {/* Events List */}
+      <div className="bg-[#111] rounded-3xl p-6 shadow-sm border border-zinc-800/50 space-y-4">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="text-lg font-bold text-brand-white">Ближайшие события</h3>
         </div>
         
-        <div className="grid grid-cols-7 gap-2 text-center text-xs font-semibold text-zinc-400 mb-2">
-          {['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС'].map(day => <div key={day}>{day}</div>)}
-        </div>
-
-        <div className="grid grid-cols-7 gap-2">
-          {getDaysInMonth(currentMonth).map((dayObj, i) => {
-            const { date, isCurrentMonth } = dayObj;
-            const isSelected = isSameDay(date, selectedDate);
-            const isToday = isSameDay(date, new Date());
-            const hasEvent = events.some(e => isSameDay(new Date(e.date), date));
-            
-            return (
-              <button
-                key={i}
-                onClick={() => setSelectedDate(date)}
-                className={`h-10 w-10 rounded-full flex items-center justify-center text-sm font-bold transition-all relative ${
-                  isSelected 
-                    ? 'bg-zinc-900 text-white' 
-                    : isToday
-                      ? 'bg-zinc-100 text-zinc-900'
-                      : isCurrentMonth 
-                        ? 'text-zinc-900 hover:bg-zinc-50'
-                        : 'text-zinc-300'
-                }`}
-              >
-                {date.getDate()}
-                {hasEvent && (
-                  <span className={`absolute bottom-1 w-1 h-1 rounded-full ${isSelected ? 'bg-white' : 'bg-rose-500'}`} />
-                )}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Events for selected date */}
-        <div className="mt-6 space-y-3">
-          {selectedDateEvents.length === 0 ? (
-            <div className="bg-zinc-50 rounded-2xl p-4 text-center border border-zinc-100">
-              <p className="text-sm font-medium text-zinc-500">Нет событий</p>
+        <div className="space-y-3">
+          {events.length === 0 ? (
+            <div className="bg-brand-black rounded-2xl p-6 text-center border border-zinc-800/50">
+              <CalendarIcon className="w-8 h-8 text-zinc-500 mx-auto mb-2" />
+              <p className="text-sm font-medium text-zinc-400">Нет предстоящих событий</p>
             </div>
           ) : (
-            selectedDateEvents.map(event => (
-              <div key={event.id} className="bg-zinc-50 p-4 rounded-2xl flex items-start space-x-4">
-                <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center flex-shrink-0 shadow-sm">
-                  <Clock size={18} className="text-rose-500" />
+            events.slice(0, 5).map(event => (
+              <div key={event.id} className="bg-brand-black p-4 rounded-2xl flex items-start space-x-4 border border-zinc-800/50 hover:border-zinc-700 transition-colors">
+                <div className="w-12 h-12 rounded-xl bg-[#111] flex flex-col items-center justify-center flex-shrink-0 shadow-sm border border-zinc-800">
+                  <span className="text-[10px] font-bold text-rose-500 uppercase">
+                    {new Date(event.date).toLocaleDateString('ru-RU', { month: 'short' }).replace('.', '')}
+                  </span>
+                  <span className="text-lg font-bold text-brand-white leading-none mt-0.5">
+                    {new Date(event.date).getDate()}
+                  </span>
                 </div>
-                <div>
-                  <h4 className="text-sm font-bold text-zinc-900">{event.title}</h4>
-                  <p className="text-xs text-zinc-500 mt-1 line-clamp-2">{event.description}</p>
+                <div className="flex-1 min-w-0 pt-0.5">
+                  <h4 className="text-sm font-bold text-brand-white truncate">{event.title}</h4>
+                  <p className="text-xs text-zinc-400 mt-1 line-clamp-2">{event.description}</p>
                 </div>
               </div>
             ))
@@ -272,20 +190,20 @@ export default function ResidentHome() {
       {/* Code Tracker & Guild Summary */}
       <div className="space-y-4 px-2">
         <div className="flex items-center justify-between">
-          <h3 className="text-lg font-bold text-zinc-900">Мой прогресс</h3>
-          <span className="text-sm font-bold text-zinc-900">{progress}%</span>
+          <h3 className="text-lg font-bold text-brand-white">Мой прогресс</h3>
+          <span className="text-sm font-bold text-brand-white">{progress}%</span>
         </div>
         
-        <div className="bg-white rounded-3xl p-6 shadow-sm border border-zinc-100 space-y-5">
+        <div className="bg-[#111] rounded-3xl p-6 shadow-sm border border-zinc-800/50 space-y-5">
           <div>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-3">
-                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${progress === 100 ? 'bg-emerald-100' : 'bg-zinc-100'}`}>
-                  <CheckCircle2 size={24} className={progress === 100 ? 'text-emerald-600' : 'text-zinc-500'} />
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${progress === 100 ? 'bg-emerald-100' : 'bg-zinc-800/50'}`}>
+                  <CheckCircle2 size={24} className={progress === 100 ? 'text-emerald-600' : 'text-zinc-400'} />
                 </div>
                 <div>
                   <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Общий прогресс</p>
-                  <p className="text-xl font-bold text-zinc-900">
+                  <p className="text-xl font-bold text-brand-white">
                     {completedCodesSum % 1 === 0 ? completedCodesSum : completedCodesSum.toFixed(1)} 
                     <span className="text-sm text-zinc-400 font-medium ml-1.5">из {totalCodes} кодов</span>
                   </p>
@@ -293,57 +211,61 @@ export default function ResidentHome() {
               </div>
             </div>
             
-            <div className="w-full h-3 bg-zinc-100 rounded-full overflow-hidden shadow-inner">
+            <div className="w-full h-3 bg-zinc-800/50 rounded-full overflow-hidden shadow-inner">
               <div 
-                className={`h-full rounded-full transition-all duration-1000 ease-out ${progress === 100 ? 'bg-emerald-500' : 'bg-zinc-900'}`}
+                className={`h-full rounded-full transition-all duration-1000 ease-out ${progress === 100 ? 'bg-emerald-500' : 'bg-brand-white'}`}
                 style={{ width: `${progress}%` }}
               />
             </div>
           </div>
 
           {/* Codes List */}
-          <div className="space-y-3 pt-5 border-t border-zinc-100">
-            {codes.map(code => (
-              <div key={code.id} className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-bold text-zinc-900">{code.title}</p>
-                  <p className="text-xs text-zinc-500">{code.completedCount} / {code.totalRequired}</p>
-                </div>
-                {code.completionHistory.includes(new Date().toISOString().split('T')[0]) ? (
-                  <div className="px-4 py-2 rounded-xl text-xs font-bold bg-emerald-500 text-white">
-                    Выполнено
+          <div className="space-y-3 pt-5 border-t border-zinc-800/50">
+            {codes.length === 0 ? (
+              <p className="text-sm text-zinc-400 text-center py-2">Нет назначенных кодов</p>
+            ) : (
+              codes.map(code => (
+                <div key={code.id} className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-bold text-brand-white">{code.title}</p>
+                    <p className="text-xs text-zinc-400">{code.completedCount} / {code.totalRequired}</p>
                   </div>
-                ) : (
-                  <button 
-                    onClick={() => handleMarkCompletion(code)}
-                    disabled={code.completedCount >= code.totalRequired}
-                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors ${
-                      code.completedCount >= code.totalRequired 
-                        ? 'bg-zinc-100 text-zinc-400' 
-                        : 'bg-zinc-900 text-white hover:bg-zinc-800'
-                    }`}
-                  >
-                    {code.completedCount >= code.totalRequired ? 'Готово' : 'Отметить'}
-                  </button>
-                )}
-              </div>
-            ))}
+                  {code.completionHistory.includes(new Date().toISOString().split('T')[0]) ? (
+                    <div className="px-4 py-2 rounded-xl text-xs font-bold bg-emerald-900/20 text-emerald-400 border border-emerald-900/50">
+                      Выполнено
+                    </div>
+                  ) : (
+                    <button 
+                      onClick={() => handleMarkCompletion(code)}
+                      disabled={code.completedCount >= code.totalRequired}
+                      className={`px-4 py-2 rounded-xl text-xs font-bold transition-colors ${
+                        code.completedCount >= code.totalRequired 
+                          ? 'bg-zinc-800/50 text-zinc-400' 
+                          : 'bg-brand-white text-brand-black hover:bg-gray-200'
+                      }`}
+                    >
+                      {code.completedCount >= code.totalRequired ? 'Готово' : 'Отметить'}
+                    </button>
+                  )}
+                </div>
+              ))
+            )}
           </div>
 
           {myGuild && (
-            <div className="pt-5 border-t border-zinc-100 flex items-center justify-between">
+            <div className="pt-5 border-t border-zinc-800/50 flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-amber-900/20 border border-amber-900/50 flex items-center justify-center">
                   <Shield size={20} className="text-amber-500" />
                 </div>
                 <div>
-                  <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Моя гильдия</p>
-                  <p className="text-sm font-bold text-zinc-900">{myGuild.name}</p>
+                  <p className="text-xs font-medium text-zinc-400 uppercase tracking-wider">Моя гильдия</p>
+                  <p className="text-sm font-bold text-brand-white">{myGuild.name}</p>
                 </div>
               </div>
               <div className="text-right">
-                <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider">Рейтинг</p>
-                <p className="text-lg font-bold text-zinc-900 flex items-center justify-end">
+                <p className="text-xs font-medium text-zinc-400 uppercase tracking-wider">Рейтинг</p>
+                <p className="text-lg font-bold text-brand-white flex items-center justify-end">
                   <Trophy size={16} className="text-amber-400 mr-1.5" />
                   {guildRank} место
                 </p>

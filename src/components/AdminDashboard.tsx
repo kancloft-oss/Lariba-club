@@ -1,20 +1,22 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { LogOut, Users, Calendar, Shield, CheckSquare } from 'lucide-react';
+import { LogOut, Users, Calendar, Shield, CheckSquare, BarChart2 } from 'lucide-react';
 import AdminUsers from './admin/AdminUsers';
 import AdminEvents from './admin/AdminEvents';
 import AdminGuilds from './admin/AdminGuilds';
 import AdminCodes from './admin/AdminCodes';
+import AdminStatistics from './admin/AdminStatistics';
 
 export default function AdminDashboard() {
   const { userProfile, logout } = useAuth();
-  const [activeTab, setActiveTab] = useState<'users' | 'events' | 'guilds' | 'codes'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'events' | 'guilds' | 'codes' | 'stats'>('users');
 
   const navItems = [
     { id: 'users', label: 'Резиденты', icon: Users },
     { id: 'events', label: 'События', icon: Calendar },
     { id: 'codes', label: 'Коды', icon: CheckSquare },
     { id: 'guilds', label: 'Гильдии', icon: Shield },
+    { id: 'stats', label: 'Статистика', icon: BarChart2 },
   ] as const;
 
   return (
@@ -81,6 +83,7 @@ export default function AdminDashboard() {
         {activeTab === 'events' && <AdminEvents />}
         {activeTab === 'codes' && <AdminCodes />}
         {activeTab === 'guilds' && <AdminGuilds />}
+        {activeTab === 'stats' && <AdminStatistics />}
       </div>
 
       {/* Mobile Bottom Nav */}

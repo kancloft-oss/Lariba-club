@@ -96,28 +96,28 @@ export default function ResidentTracker() {
 
   return (
     <div className="max-w-4xl mx-auto pb-20 md:pb-0 space-y-6">
-      <h2 className="text-2xl font-bold text-zinc-900 tracking-tight">Мои коды</h2>
+      <h2 className="text-2xl font-bold text-brand-white tracking-tight">Мои коды</h2>
       
       {codes.length === 0 ? (
-        <div className="bg-white rounded-2xl shadow-sm border border-zinc-200 p-10 text-center flex flex-col items-center justify-center min-h-[300px]">
-          <div className="w-16 h-16 bg-zinc-50 rounded-full flex items-center justify-center mb-4">
+        <div className="bg-[#111] rounded-2xl shadow-sm border border-zinc-800 p-10 text-center flex flex-col items-center justify-center min-h-[300px]">
+          <div className="w-16 h-16 bg-brand-black rounded-full flex items-center justify-center mb-4">
             <CheckSquare className="h-8 w-8 text-zinc-400" />
           </div>
-          <h3 className="text-lg font-bold text-zinc-900">Нет назначенных кодов</h3>
-          <p className="mt-2 text-sm text-zinc-500 max-w-sm mx-auto">У вас пока нет кодов для отслеживания. Они появятся здесь, когда администратор назначит их вам.</p>
+          <h3 className="text-lg font-bold text-brand-white">Нет назначенных кодов</h3>
+          <p className="mt-2 text-sm text-zinc-400 max-w-sm mx-auto">У вас пока нет кодов для отслеживания. Они появятся здесь, когда администратор назначит их вам.</p>
         </div>
       ) : (
         <div className="space-y-8">
           {/* Pending Codes */}
           <div>
-            <h3 className="text-lg font-bold text-zinc-900 mb-4 flex items-center">
+            <h3 className="text-lg font-bold text-brand-white mb-4 flex items-center">
               <Clock className="mr-2.5 text-amber-500" size={20} />
               В процессе ({pendingCodes.length})
             </h3>
-            <div className="bg-white shadow-sm border border-zinc-200 overflow-hidden rounded-2xl">
+            <div className="bg-[#111] shadow-sm border border-zinc-800 overflow-hidden rounded-2xl">
               <ul className="divide-y divide-zinc-100">
                 {pendingCodes.length === 0 && (
-                  <li className="px-6 py-8 text-center text-sm text-zinc-500 font-medium">Все коды выполнены! 🎉</li>
+                  <li className="px-6 py-8 text-center text-sm text-zinc-400 font-medium">Все коды выполнены! 🎉</li>
                 )}
                 {pendingCodes.map((code) => {
                   const today = new Date().toISOString().split('T')[0];
@@ -126,22 +126,22 @@ export default function ResidentTracker() {
                   const codeProgress = Math.round((code.completedCount / code.totalRequired) * 100);
                   
                   return (
-                    <li key={code.id} className={`transition-all duration-300 ${isDoneToday ? 'bg-emerald-50/50 border-l-4 border-emerald-500' : 'hover:bg-zinc-50/50 border-l-4 border-transparent'}`}>
+                    <li key={code.id} className={`transition-all duration-300 ${isDoneToday ? 'bg-emerald-50/50 border-l-4 border-emerald-500' : 'hover:bg-brand-black/50 border-l-4 border-transparent'}`}>
                       <div className="px-5 py-5 sm:px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div className="flex-1">
                           <div className="flex items-start justify-between">
                             <div>
-                              <p className="text-base font-bold text-zinc-900">{code.title}</p>
-                              <p className="mt-1 text-sm text-zinc-600 leading-relaxed max-w-lg">{code.description}</p>
+                              <p className="text-base font-bold text-brand-white">{code.title}</p>
+                              <p className="mt-1 text-sm text-zinc-400 leading-relaxed max-w-lg">{code.description}</p>
                             </div>
                             <div className="text-right flex-shrink-0 ml-4">
-                              <p className={`text-xs font-bold ${isDoneToday ? 'text-emerald-600' : 'text-zinc-900'}`}>{codeProgress}%</p>
+                              <p className={`text-xs font-bold ${isDoneToday ? 'text-emerald-600' : 'text-brand-white'}`}>{codeProgress}%</p>
                             </div>
                           </div>
 
-                          <div className="mt-3 w-full max-w-md h-1.5 bg-zinc-100 rounded-full overflow-hidden">
+                          <div className="mt-3 w-full max-w-md h-1.5 bg-zinc-800/50 rounded-full overflow-hidden">
                             <div 
-                              className={`h-full rounded-full transition-all duration-500 ${isDoneToday ? 'bg-emerald-500' : 'bg-zinc-900'}`}
+                              className={`h-full rounded-full transition-all duration-500 ${isDoneToday ? 'bg-emerald-500' : 'bg-brand-white'}`}
                               style={{ width: `${codeProgress}%` }}
                             />
                           </div>
@@ -153,7 +153,7 @@ export default function ResidentTracker() {
                                 <Clock size={12} className="mr-1" />
                                 Дедлайн: {new Date(code.deadline).toLocaleDateString('ru-RU')}
                               </p>
-                              <p className="text-xs font-medium text-zinc-500">
+                              <p className="text-xs font-medium text-zinc-400">
                                 Прогресс: {code.completedCount} / {code.totalRequired}
                               </p>
                             </div>
@@ -169,7 +169,7 @@ export default function ResidentTracker() {
                                   )}
                                 </p>
                                 {nextDate && !isDoneToday && code.frequencyType !== 'daily' && (
-                                  <p className="text-xs font-medium text-zinc-500">
+                                  <p className="text-xs font-medium text-zinc-400">
                                     След. выполнение: {nextDate.toLocaleDateString('ru-RU')}
                                   </p>
                                 )}
@@ -178,7 +178,7 @@ export default function ResidentTracker() {
                           </div>
                         </div>
                         {isDoneToday ? (
-                          <div className="w-full sm:w-auto flex-shrink-0 border border-transparent rounded-xl py-2.5 px-5 inline-flex items-center justify-center text-sm font-medium bg-emerald-100 text-emerald-700 shadow-sm">
+                          <div className="w-full sm:w-auto flex-shrink-0 border border-transparent rounded-xl py-2.5 px-5 inline-flex items-center justify-center text-sm font-medium bg-emerald-900/20 text-emerald-400 border-emerald-900/50 shadow-sm">
                             Выполнено сегодня
                           </div>
                         ) : (
@@ -186,7 +186,7 @@ export default function ResidentTracker() {
                             onClick={() => toggleStatus(code)}
                             disabled={code.completedCount >= code.totalRequired}
                             className={`w-full sm:w-auto flex-shrink-0 border border-transparent rounded-xl py-2.5 px-5 inline-flex items-center justify-center text-sm font-medium transition-colors shadow-sm ${
-                              code.completedCount >= code.totalRequired ? 'bg-zinc-100 text-zinc-400' : 'bg-zinc-900 text-white hover:bg-zinc-800'
+                              code.completedCount >= code.totalRequired ? 'bg-zinc-800/50 text-zinc-400' : 'bg-brand-white text-brand-black hover:bg-gray-200'
                             }`}
                           >
                             {code.completedCount >= code.totalRequired ? 'Готово' : 'Отметить выполнение'}
@@ -203,23 +203,23 @@ export default function ResidentTracker() {
 
           {/* Completed Codes */}
           <div>
-            <h3 className="text-lg font-bold text-zinc-900 mb-4 flex items-center">
+            <h3 className="text-lg font-bold text-brand-white mb-4 flex items-center">
               <CheckCircle2 className="mr-2.5 text-emerald-500" size={20} />
               Выполненные ({completedCodes.length})
             </h3>
-            <div className="bg-white shadow-sm border border-zinc-200 overflow-hidden rounded-2xl opacity-75 hover:opacity-100 transition-opacity">
+            <div className="bg-[#111] shadow-sm border border-zinc-800 overflow-hidden rounded-2xl opacity-75 hover:opacity-100 transition-opacity">
               <ul className="divide-y divide-zinc-100">
                 {completedCodes.length === 0 && (
-                  <li className="px-6 py-8 text-center text-sm text-zinc-500 font-medium">Пока нет выполненных кодов.</li>
+                  <li className="px-6 py-8 text-center text-sm text-zinc-400 font-medium">Пока нет выполненных кодов.</li>
                 )}
                 {completedCodes.map((code) => (
-                  <li key={code.id} className="bg-zinc-50/30">
+                  <li key={code.id} className="bg-brand-black/30">
                     <div className="px-5 py-5 sm:px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                       <div className="flex-1">
                         <div className="flex items-start justify-between">
                           <div>
-                            <p className="text-base font-bold text-zinc-900 line-through decoration-zinc-300">{code.title}</p>
-                            <p className="mt-1 text-sm text-zinc-500 line-through decoration-zinc-300">{code.description}</p>
+                            <p className="text-base font-bold text-brand-white line-through decoration-zinc-300">{code.title}</p>
+                            <p className="mt-1 text-sm text-zinc-400 line-through decoration-zinc-300">{code.description}</p>
                           </div>
                           <div className="text-right flex-shrink-0 ml-4">
                             <p className="text-xs font-bold text-emerald-600">100%</p>
@@ -234,7 +234,7 @@ export default function ResidentTracker() {
                         </div>
                       </div>
                       <div className="flex-shrink-0 flex flex-row sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2">
-                        <span className="px-3 py-1 inline-flex text-xs font-semibold rounded-full bg-emerald-100 text-emerald-700">
+                        <span className="px-3 py-1 inline-flex text-xs font-semibold rounded-full bg-emerald-900/20 text-emerald-400 border border-emerald-900/50">
                           Выполнено
                         </span>
                       </div>

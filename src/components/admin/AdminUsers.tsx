@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { collection, onSnapshot, doc, setDoc, deleteDoc, updateDoc } from 'firebase/firestore';
-import { createUserWithEmailAndPassword, getAuth, signOut } from 'firebase/auth';
+import { createUserWithEmailAndPassword, getAuth, signOut, sendPasswordResetEmail } from 'firebase/auth';
 import { initializeApp } from 'firebase/app';
 import { db, auth, handleFirestoreError, OperationType } from '../../firebase';
 import firebaseConfig from '../../../firebase-applet-config.json';
 import { UserProfile, Tariff } from '../../contexts/AuthContext';
-import { Plus, Edit2, Trash2, X, Search } from 'lucide-react';
+import { Plus, Edit2, Trash2, X, Search, Key } from 'lucide-react';
 
 // Initialize a secondary app for user creation to prevent logging out the admin
 const secondaryApp = initializeApp(firebaseConfig, 'SecondaryApp');
@@ -16,6 +16,9 @@ export default function AdminUsers() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [tariffFilter, setTariffFilter] = useState<Tariff | 'All'>('All');
+  const [paymentStatusFilter, setPaymentStatusFilter] = useState<'paid' | 'unpaid' | 'All'>('All');
+  const [dueSoonFilter, setDueSoonFilter] = useState(false);
   
   // Form state
   const [login, setLogin] = useState('');
@@ -128,9 +131,23 @@ export default function AdminUsers() {
     }
   };
 
+  const handleResetPassword = async (email: string) => {
+    if (window.confirm('Вы уверены, что хотите отправить письмо для сброса пароля этому резиденту?')) {
+      try {
+        await sendPasswordResetEmail(auth, email.toLowerCase() + '@lariba.local');
+        alert('Письмо для сброса пароля отправлено.');
+      } catch (err: any) {
+        setError('Ошибка при отправке письма: ' + err.message);
+      }
+    }
+  };
+
   const filteredUsers = users.filter(user => 
-    user.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    user.login.toLowerCase().includes(searchTerm.toLowerCase())
+    (user.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+     user.login.toLowerCase().includes(searchTerm.toLowerCase())) &&
+    (tariffFilter === 'All' || user.tariff === tariffFilter) &&
+    (paymentStatusFilter === 'All' || user.paymentStatus === paymentStatusFilter) &&
+    (!dueSoonFilter || (user.paymentDueDate && new Date(user.paymentDueDate) <= new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)))
   );
 
   return (
@@ -157,6 +174,24 @@ export default function AdminUsers() {
           onChange={(e) => setSearchTerm(e.target.value)}
           className="block w-full pl-10 pr-3 py-3 border border-zinc-200 rounded-xl leading-5 bg-white placeholder-zinc-400 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-zinc-900 sm:text-sm transition-all shadow-sm"
         />
+      </div>
+
+      <div className="flex gap-4">
+        <select value={tariffFilter} onChange={(e) => setTariffFilter(e.target.value as Tariff | 'All')} className="block w-full border border-zinc-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-zinc-900 focus:border-zinc-900 sm:text-sm transition-all bg-white">
+          <option value="All">Все тарифы</option>
+          <option value="Moneycan">Moneycan</option>
+          <option value="Lemoner">Lemoner</option>
+          <option value="Richer">Richer</option>
+        </select>
+        <select value={paymentStatusFilter} onChange={(e) => setPaymentStatusFilter(e.target.value as 'paid' | 'unpaid' | 'All')} className="block w-full border border-zinc-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-zinc-900 focus:border-zinc-900 sm:text-sm transition-all bg-white">
+          <option value="All">Все статусы оплаты</option>
+          <option value="paid">Оплачено</option>
+          <option value="unpaid">Не оплачено</option>
+        </select>
+        <label className="flex items-center gap-2 text-sm text-zinc-700 whitespace-nowrap">
+          <input type="checkbox" checked={dueSoonFilter} onChange={(e) => setDueSoonFilter(e.target.checked)} />
+          Оплата скоро
+        </label>
       </div>
 
       {/* Desktop Table View */}
@@ -200,6 +235,9 @@ export default function AdminUsers() {
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                  <button onClick={() => handleResetPassword(user.login)} className="text-zinc-400 hover:text-zinc-900 transition-colors mr-3 p-1" title="Сбросить пароль">
+                    <Key size={18} />
+                  </button>
                   <button onClick={() => handleOpenModal(user)} className="text-zinc-400 hover:text-zinc-900 transition-colors mr-3 p-1">
                     <Edit2 size={18} />
                   </button>
@@ -223,6 +261,9 @@ export default function AdminUsers() {
                 <p className="text-sm text-zinc-500 mt-0.5">{user.login}</p>
               </div>
               <div className="flex gap-2">
+                <button onClick={() => handleResetPassword(user.login)} className="p-2 text-zinc-400 hover:text-zinc-900 bg-zinc-50 rounded-lg" title="Сбросить пароль">
+                  <Key size={16} />
+                </button>
                 <button onClick={() => handleOpenModal(user)} className="p-2 text-zinc-400 hover:text-zinc-900 bg-zinc-50 rounded-lg">
                   <Edit2 size={16} />
                 </button>

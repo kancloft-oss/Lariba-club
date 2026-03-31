@@ -4,6 +4,7 @@ import { db, handleFirestoreError, OperationType } from '../../firebase';
 import { Plus, Trash2, X, CheckCircle2, Circle, Edit2, Filter, Shield } from 'lucide-react';
 import { UserProfile } from '../../contexts/AuthContext';
 import { Guild } from './AdminGuilds';
+import { TariffBadge } from '../TariffBadge';
 
 export interface Code {
   id: string;
@@ -209,7 +210,7 @@ export default function AdminCodes() {
   return (
     <div className="space-y-6 pb-20 md:pb-0">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h2 className="text-2xl font-bold text-zinc-900 tracking-tight">Управление кодами</h2>
+        <h2 className="text-2xl font-bold text-brand-white tracking-tight">Управление кодами</h2>
         <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-3">
           <div className="relative w-full sm:w-64">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -218,7 +219,7 @@ export default function AdminCodes() {
             <select
               value={selectedGuildId}
               onChange={(e) => setSelectedGuildId(e.target.value)}
-              className="block w-full pl-10 pr-4 py-2.5 border border-zinc-200 rounded-xl focus:ring-2 focus:ring-zinc-900 focus:border-zinc-900 sm:text-sm transition-all bg-white font-medium text-zinc-700"
+              className="block w-full pl-10 pr-4 py-2.5 border border-zinc-800 rounded-xl focus:ring-2 focus:ring-zinc-900 focus:border-zinc-900 sm:text-sm transition-all bg-[#111] font-medium text-zinc-300"
             >
               <option value="all">Все гильдии</option>
               {guilds.map(guild => (
@@ -228,7 +229,7 @@ export default function AdminCodes() {
           </div>
           <button
             onClick={() => handleOpenModal()}
-            className="w-full sm:w-auto bg-zinc-900 text-white px-5 py-2.5 rounded-xl flex items-center justify-center space-x-2 hover:bg-zinc-800 transition-colors shadow-sm"
+            className="w-full sm:w-auto bg-brand-white text-brand-black px-5 py-2.5 rounded-xl flex items-center justify-center space-x-2 hover:bg-gray-200 transition-colors shadow-sm"
           >
             <Plus size={20} />
             <span className="font-medium">Назначить код</span>
@@ -237,46 +238,51 @@ export default function AdminCodes() {
       </div>
 
       {/* Desktop Table View */}
-      <div className="hidden md:block bg-white shadow-sm border border-zinc-200 rounded-2xl overflow-hidden">
+      <div className="hidden md:block bg-[#111] shadow-sm border border-zinc-800 rounded-2xl overflow-hidden">
         <table className="min-w-full divide-y divide-zinc-200">
-          <thead className="bg-zinc-50/50">
+          <thead className="bg-brand-black/50">
             <tr>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-zinc-500 uppercase tracking-wider">Резидент</th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-zinc-500 uppercase tracking-wider">Гильдия</th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-zinc-500 uppercase tracking-wider">Название кода</th>
-              <th className="px-6 py-4 text-left text-xs font-semibold text-zinc-500 uppercase tracking-wider">Статус</th>
-              <th className="px-6 py-4 text-right text-xs font-semibold text-zinc-500 uppercase tracking-wider">Действия</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-zinc-400 uppercase tracking-wider">Резидент</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-zinc-400 uppercase tracking-wider">Гильдия</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-zinc-400 uppercase tracking-wider">Название кода</th>
+              <th className="px-6 py-4 text-left text-xs font-semibold text-zinc-400 uppercase tracking-wider">Статус</th>
+              <th className="px-6 py-4 text-right text-xs font-semibold text-zinc-400 uppercase tracking-wider">Действия</th>
             </tr>
           </thead>
-          <tbody className="bg-white divide-y divide-zinc-100">
+          <tbody className="bg-[#111] divide-y divide-zinc-100">
             {filteredCodes.map((code) => (
-              <tr key={code.id} className="hover:bg-zinc-50/50 transition-colors">
+              <tr key={code.id} className="hover:bg-brand-black/50 transition-colors">
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-zinc-900">{getUserName(code.residentId)}</div>
+                  <div className="text-sm font-medium text-brand-white">{getUserName(code.residentId)}</div>
+                  <div className="text-xs text-zinc-400 mt-0.5">
+                    {users.find(u => u.uid === code.residentId)?.tariff && (
+                      <TariffBadge tariff={users.find(u => u.uid === code.residentId)!.tariff} />
+                    )}
+                  </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center text-xs font-medium text-zinc-500">
+                  <div className="flex items-center text-xs font-medium text-zinc-400">
                     <Shield size={12} className="mr-1.5 text-zinc-400" />
                     {getUserGuildName(code.residentId)}
                   </div>
                 </td>
                 <td className="px-6 py-4">
-                  <div className="text-sm font-medium text-zinc-900">{code.title}</div>
-                  <div className="text-xs text-zinc-500 truncate max-w-xs mt-0.5">{code.description}</div>
+                  <div className="text-sm font-medium text-brand-white">{code.title}</div>
+                  <div className="text-xs text-zinc-400 truncate max-w-xs mt-0.5">{code.description}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center space-x-2">
-                    <div className="text-sm font-medium text-zinc-900">
+                    <div className="text-sm font-medium text-brand-white">
                       {code.completedCount} / {code.totalRequired}
                     </div>
                     <span className={`px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
-                      ${code.completedCount >= code.totalRequired ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+                      ${code.completedCount >= code.totalRequired ? 'bg-emerald-900/20 text-emerald-400 border border-emerald-900/50' : 'bg-amber-900/20 text-amber-400 border border-amber-900/50'}`}>
                       {code.completedCount >= code.totalRequired ? 'Выполнено' : 'В процессе'}
                     </span>
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium flex justify-end gap-2">
-                  <button onClick={() => handleOpenModal(code)} className="text-zinc-400 hover:text-zinc-900 transition-colors p-1">
+                  <button onClick={() => handleOpenModal(code)} className="text-zinc-400 hover:text-brand-white transition-colors p-1">
                     <Edit2 size={18} />
                   </button>
                   <button onClick={() => handleDelete(code.id)} className="text-zinc-400 hover:text-rose-600 transition-colors p-1">
@@ -292,37 +298,42 @@ export default function AdminCodes() {
       {/* Mobile Card View */}
       <div className="md:hidden space-y-4">
         {filteredCodes.map((code) => (
-          <div key={code.id} className="bg-white p-5 rounded-2xl shadow-sm border border-zinc-200 flex flex-col gap-4">
+          <div key={code.id} className="bg-[#111] p-5 rounded-2xl shadow-sm border border-zinc-800 flex flex-col gap-4">
             <div className="flex justify-between items-start">
               <div>
-                <h3 className="text-base font-bold text-zinc-900">{code.title}</h3>
+                <h3 className="text-base font-bold text-brand-white">{code.title}</h3>
                 <div className="flex flex-col mt-1">
-                  <p className="text-sm font-medium text-zinc-600">{getUserName(code.residentId)}</p>
-                  <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider flex items-center mt-0.5">
+                  <p className="text-sm font-medium text-zinc-400">{getUserName(code.residentId)}</p>
+                  <div className="mt-1">
+                    {users.find(u => u.uid === code.residentId)?.tariff && (
+                      <TariffBadge tariff={users.find(u => u.uid === code.residentId)!.tariff} />
+                    )}
+                  </div>
+                  <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider flex items-center mt-1">
                     <Shield size={10} className="mr-1" />
                     {getUserGuildName(code.residentId)}
                   </p>
                 </div>
               </div>
               <div className="flex gap-2">
-                <button onClick={() => handleOpenModal(code)} className="p-2 text-zinc-400 hover:text-zinc-900 bg-zinc-50 rounded-lg">
+                <button onClick={() => handleOpenModal(code)} className="p-2 text-zinc-400 hover:text-brand-white bg-brand-black rounded-lg">
                   <Edit2 size={16} />
                 </button>
-                <button onClick={() => handleDelete(code.id)} className="p-2 text-zinc-400 hover:text-rose-600 bg-zinc-50 rounded-lg">
+                <button onClick={() => handleDelete(code.id)} className="p-2 text-zinc-400 hover:text-rose-600 bg-brand-black rounded-lg">
                   <Trash2 size={16} />
                 </button>
               </div>
             </div>
             
-            <p className="text-sm text-zinc-500 leading-relaxed">{code.description}</p>
+            <p className="text-sm text-zinc-400 leading-relaxed">{code.description}</p>
             
-            <div className="flex items-center justify-between pt-3 border-t border-zinc-100">
+            <div className="flex items-center justify-between pt-3 border-t border-zinc-800/50">
               <div className="flex items-center space-x-2">
-                <div className="text-sm font-medium text-zinc-900">
+                <div className="text-sm font-medium text-brand-white">
                   {code.completedCount} / {code.totalRequired}
                 </div>
                 <span className={`px-2.5 py-1 text-xs font-semibold rounded-full 
-                  ${code.completedCount >= code.totalRequired ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`}>
+                  ${code.completedCount >= code.totalRequired ? 'bg-emerald-900/20 text-emerald-400 border border-emerald-900/50' : 'bg-amber-900/20 text-amber-400 border border-amber-900/50'}`}>
                   {code.completedCount >= code.totalRequired ? 'Выполнено' : 'В процессе'}
                 </span>
               </div>
@@ -336,23 +347,23 @@ export default function AdminCodes() {
         <div className="fixed inset-0 z-50 overflow-y-auto">
           <div className="flex items-end sm:items-center justify-center min-h-screen p-4 text-center sm:p-0">
             <div className="fixed inset-0 transition-opacity" aria-hidden="true" onClick={handleCloseModal}>
-              <div className="absolute inset-0 bg-zinc-900/40 backdrop-blur-sm"></div>
+              <div className="absolute inset-0 bg-brand-white/40 backdrop-blur-sm"></div>
             </div>
-            <div className="relative z-10 inline-block align-bottom bg-white rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full w-full">
-              <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+            <div className="relative z-10 inline-block align-bottom bg-[#111] rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full w-full">
+              <div className="bg-[#111] px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                 <div className="flex justify-between items-center mb-5">
-                  <h3 className="text-xl font-bold text-zinc-900 tracking-tight">
+                  <h3 className="text-xl font-bold text-brand-white tracking-tight">
                     Назначить новый код
                   </h3>
-                  <button onClick={handleCloseModal} className="text-zinc-400 hover:text-zinc-600 bg-zinc-100 p-1.5 rounded-full transition-colors">
+                  <button onClick={handleCloseModal} className="text-zinc-400 hover:text-zinc-400 bg-zinc-800/50 p-1.5 rounded-full transition-colors">
                     <X size={20} />
                   </button>
                 </div>
-                {error && <div className="mb-5 p-3 bg-rose-50 text-sm text-rose-600 rounded-xl border border-rose-100">{error}</div>}
+                {error && <div className="mb-5 p-3 bg-rose-900/20 text-sm text-rose-400 rounded-xl border border-rose-900/50">{error}</div>}
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-zinc-700 mb-1.5">Резидент</label>
-                    <select required value={residentId} onChange={(e) => setResidentId(e.target.value)} className="block w-full border border-zinc-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-zinc-900 focus:border-zinc-900 sm:text-sm transition-all bg-white">
+                    <label className="block text-sm font-medium text-zinc-300 mb-1.5">Резидент</label>
+                    <select required value={residentId} onChange={(e) => setResidentId(e.target.value)} className="block w-full border border-zinc-800 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-brand-white focus:border-brand-white sm:text-sm transition-all bg-brand-black text-brand-white">
                       <option value="">Выберите резидента...</option>
                       {users.map(u => (
                         <option key={u.uid} value={u.uid}>{u.name} ({u.tariff})</option>
@@ -360,20 +371,20 @@ export default function AdminCodes() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-zinc-700 mb-1.5">Название кода</label>
-                    <input type="text" required value={title} onChange={(e) => setTitle(e.target.value)} className="block w-full border border-zinc-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-zinc-900 focus:border-zinc-900 sm:text-sm transition-all" />
+                    <label className="block text-sm font-medium text-zinc-300 mb-1.5">Название кода</label>
+                    <input type="text" required value={title} onChange={(e) => setTitle(e.target.value)} className="block w-full border border-zinc-800 bg-brand-black text-brand-white rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-brand-white focus:border-brand-white sm:text-sm transition-all" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-zinc-700 mb-1.5">Описание</label>
-                    <textarea required value={description} onChange={(e) => setDescription(e.target.value)} rows={3} className="block w-full border border-zinc-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-zinc-900 focus:border-zinc-900 sm:text-sm transition-all resize-none" />
+                    <label className="block text-sm font-medium text-zinc-300 mb-1.5">Описание</label>
+                    <textarea required value={description} onChange={(e) => setDescription(e.target.value)} rows={3} className="block w-full border border-zinc-800 bg-brand-black text-brand-white rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-brand-white focus:border-brand-white sm:text-sm transition-all resize-none" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-zinc-700 mb-1.5">Дедлайн</label>
-                    <input type="date" required value={deadline} onChange={(e) => setDeadline(e.target.value)} className="block w-full border border-zinc-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-zinc-900 focus:border-zinc-900 sm:text-sm transition-all bg-white" />
+                    <label className="block text-sm font-medium text-zinc-300 mb-1.5">Дедлайн</label>
+                    <input type="date" required value={deadline} onChange={(e) => setDeadline(e.target.value)} className="block w-full border border-zinc-800 bg-brand-black text-brand-white rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-brand-white focus:border-brand-white sm:text-sm transition-all" />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-zinc-700 mb-1.5">Тип разбивки</label>
-                    <select required value={frequencyType} onChange={(e) => setFrequencyType(e.target.value as any)} className="block w-full border border-zinc-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-zinc-900 focus:border-zinc-900 sm:text-sm transition-all bg-white">
+                    <label className="block text-sm font-medium text-zinc-300 mb-1.5">Тип разбивки</label>
+                    <select required value={frequencyType} onChange={(e) => setFrequencyType(e.target.value as any)} className="block w-full border border-zinc-800 bg-brand-black text-brand-white rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-brand-white focus:border-brand-white sm:text-sm transition-all">
                       <option value="once">Разово</option>
                       <option value="daily">По дням</option>
                       <option value="everyOtherDay">Через день</option>
@@ -382,7 +393,7 @@ export default function AdminCodes() {
                   </div>
                   {frequencyType === 'weekly' && (
                     <div>
-                      <label className="block text-sm font-medium text-zinc-700 mb-1.5">Дни недели</label>
+                      <label className="block text-sm font-medium text-zinc-300 mb-1.5">Дни недели</label>
                       <div className="flex gap-2">
                         {['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'].map((day, i) => (
                           <button
@@ -392,7 +403,7 @@ export default function AdminCodes() {
                               const dayStr = (i + 1).toString();
                               setSchedule(prev => prev.includes(dayStr) ? prev.filter(d => d !== dayStr) : [...prev, dayStr]);
                             }}
-                            className={`px-3 py-2 rounded-lg text-xs font-bold ${schedule.includes((i + 1).toString()) ? 'bg-zinc-900 text-white' : 'bg-zinc-100 text-zinc-700'}`}
+                            className={`px-3 py-2 rounded-lg text-xs font-bold ${schedule.includes((i + 1).toString()) ? 'bg-brand-white text-brand-black' : 'bg-zinc-800/50 text-zinc-300'}`}
                           >
                             {day}
                           </button>
@@ -401,15 +412,15 @@ export default function AdminCodes() {
                     </div>
                   )}
                   <div>
-                    <label className="block text-sm font-medium text-zinc-700 mb-1.5">Всего выполнений (авто)</label>
-                    <input type="number" readOnly value={totalRequired} className="block w-full border border-zinc-200 rounded-xl px-4 py-2.5 bg-zinc-50 text-zinc-500 sm:text-sm transition-all" />
+                    <label className="block text-sm font-medium text-zinc-300 mb-1.5">Всего выполнений (авто)</label>
+                    <input type="number" readOnly value={totalRequired} className="block w-full border border-zinc-800 rounded-xl px-4 py-2.5 bg-[#111] text-zinc-400 sm:text-sm transition-all" />
                   </div>
                   
-                  <div className="mt-8 sm:flex sm:flex-row-reverse gap-3 pt-4 border-t border-zinc-100">
-                    <button type="submit" className="w-full sm:w-auto inline-flex justify-center items-center rounded-xl border border-transparent px-6 py-2.5 bg-zinc-900 text-sm font-medium text-white hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-zinc-900 transition-colors shadow-sm">
+                  <div className="mt-8 sm:flex sm:flex-row-reverse gap-3 pt-4 border-t border-zinc-800/50">
+                    <button type="submit" className="w-full sm:w-auto inline-flex justify-center items-center rounded-xl border border-transparent px-6 py-2.5 bg-brand-white text-sm font-medium text-brand-black hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-zinc-900 transition-colors shadow-sm">
                       Назначить код
                     </button>
-                    <button type="button" onClick={handleCloseModal} className="mt-3 sm:mt-0 w-full sm:w-auto inline-flex justify-center items-center rounded-xl border border-zinc-200 px-6 py-2.5 bg-white text-sm font-medium text-zinc-700 hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-zinc-900 transition-colors">
+                    <button type="button" onClick={handleCloseModal} className="mt-3 sm:mt-0 w-full sm:w-auto inline-flex justify-center items-center rounded-xl border border-zinc-800 px-6 py-2.5 bg-[#111] text-sm font-medium text-zinc-300 hover:bg-brand-black focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-zinc-900 transition-colors">
                       Отмена
                     </button>
                   </div>

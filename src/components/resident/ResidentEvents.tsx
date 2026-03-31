@@ -25,34 +25,29 @@ export default function ResidentEvents() {
   }, [userProfile]);
 
   return (
-    <div className="space-y-6 pb-20 md:pb-0">
-      <h2 className="text-2xl font-bold text-zinc-900 tracking-tight">Предстоящие мероприятия</h2>
+    <div className="max-w-md mx-auto pb-24 space-y-6 font-sans">
+      <h2 className="text-2xl font-bold text-brand-white tracking-tight">Предстоящие мероприятия</h2>
       
       <div className="space-y-4">
         {events.length === 0 ? (
-          <div className="bg-white rounded-3xl shadow-sm border border-zinc-200 p-8 text-center">
-            <CalendarIcon className="w-12 h-12 text-zinc-300 mx-auto mb-4" />
-            <p className="text-zinc-500">Пока нет доступных мероприятий для вашего тарифа.</p>
+          <div className="bg-[#111] rounded-3xl shadow-sm border border-zinc-800 p-8 text-center">
+            <CalendarIcon className="w-12 h-12 text-zinc-500 mx-auto mb-4" />
+            <p className="text-zinc-400">Пока нет доступных мероприятий для вашего тарифа.</p>
           </div>
         ) : (
           events.map(event => (
-            <div key={event.id} className="bg-white p-6 rounded-3xl shadow-sm border border-zinc-200 hover:border-zinc-300 transition-colors">
-              <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                <div className="space-y-3 flex-1">
-                  <h3 className="text-xl font-bold text-zinc-900">{event.title}</h3>
-                  <p className="text-zinc-600">{event.description}</p>
-                  
-                  <div className="flex flex-wrap gap-4 pt-2">
-                    <div className="flex items-center text-sm text-zinc-500 bg-zinc-50 px-3 py-1.5 rounded-lg">
-                      <CalendarIcon className="w-4 h-4 mr-2" />
-                      {new Date(event.date).toLocaleDateString('ru-RU', { 
-                        day: 'numeric', 
-                        month: 'long',
-                        year: 'numeric'
-                      })}
-                    </div>
-                  </div>
-                </div>
+            <div key={event.id} className="bg-[#111] p-5 rounded-3xl shadow-sm border border-zinc-800 hover:border-zinc-700 transition-colors flex items-start space-x-4">
+              <div className="w-14 h-14 rounded-2xl bg-brand-black flex flex-col items-center justify-center flex-shrink-0 shadow-sm border border-zinc-800">
+                <span className="text-xs font-bold text-rose-500 uppercase">
+                  {new Date(event.date).toLocaleDateString('ru-RU', { month: 'short' }).replace('.', '')}
+                </span>
+                <span className="text-xl font-bold text-brand-white leading-none mt-0.5">
+                  {new Date(event.date).getDate()}
+                </span>
+              </div>
+              <div className="flex-1 min-w-0 pt-1">
+                <h3 className="text-lg font-bold text-brand-white truncate">{event.title}</h3>
+                <p className="text-sm text-zinc-400 mt-1 line-clamp-2">{event.description}</p>
               </div>
             </div>
           ))
