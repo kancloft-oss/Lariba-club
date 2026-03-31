@@ -24,8 +24,8 @@ export default function ResidentDashboard() {
       {/* Desktop Sidebar (hidden on mobile) */}
       <div className="hidden md:flex w-64 bg-white border-r border-zinc-200 flex-col fixed h-full z-10">
         <div className="p-6">
-          <h1 className="text-2xl font-bold tracking-tight text-zinc-900">LARIBA</h1>
-          <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider mt-1">Клуб</p>
+          <img src="/logo.svg" alt="Laribaclub" className="h-12 w-auto rounded-xl shadow-sm" />
+          <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider mt-3 ml-1">Клуб</p>
         </div>
         
         <div className="px-6 pb-4">
@@ -69,8 +69,8 @@ export default function ResidentDashboard() {
       {/* Mobile Header */}
       <div className="md:hidden bg-white/80 backdrop-blur-md border-b border-zinc-200 p-4 sticky top-0 z-20 flex justify-between items-center">
         <div>
-          <h1 className="text-lg font-bold tracking-tight text-zinc-900 leading-none">LARIBA</h1>
-          <p className="text-[10px] font-medium text-zinc-500 uppercase tracking-wider">Клуб</p>
+          <img src="/logo.svg" alt="Laribaclub" className="h-8 w-auto rounded-lg shadow-sm mb-1" />
+          <p className="text-[10px] font-medium text-zinc-500 uppercase tracking-wider ml-0.5">Клуб</p>
         </div>
         <button onClick={logout} className="p-2 text-zinc-500 hover:text-zinc-900 bg-zinc-100 rounded-full">
           <LogOut size={18} />

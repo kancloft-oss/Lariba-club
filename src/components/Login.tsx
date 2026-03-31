@@ -59,13 +59,8 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center bg-zinc-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8 bg-white p-8 sm:p-10 rounded-3xl shadow-sm border border-zinc-200">
         <div className="text-center">
-          <div className="w-16 h-16 bg-zinc-900 text-white rounded-2xl flex items-center justify-center text-2xl font-bold mx-auto mb-6 shadow-sm">
-            L
-          </div>
-          <h2 className="text-3xl font-bold text-zinc-900 tracking-tight">
-            LARIBA Business Club
-          </h2>
-          <p className="mt-3 text-sm text-zinc-500">
+          <img src="/logo.svg" alt="Laribaclub" className="w-48 mx-auto mb-6 rounded-2xl shadow-md" />
+          <p className="mt-2 text-sm text-zinc-500">
             Войдите в свой аккаунт
           </p>
         </div>
