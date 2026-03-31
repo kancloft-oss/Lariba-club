@@ -152,22 +152,22 @@ export default function ResidentGuild() {
   return (
     <div className="max-w-6xl mx-auto pb-20 md:pb-0 space-y-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h2 className="text-2xl font-bold text-brand-white tracking-tight">Моя гильдия</h2>
+        <h2 className="text-2xl font-bold text-zinc-900 tracking-tight">Моя гильдия</h2>
         
         <div className="relative w-full sm:w-auto">
           <button 
             onClick={() => setIsHistoryOpen(!isHistoryOpen)}
-            className="w-full sm:w-auto flex items-center justify-between space-x-2 bg-[#111] border border-zinc-800 px-4 py-2 rounded-xl text-sm font-bold text-brand-white shadow-sm hover:bg-brand-black transition-colors"
+            className="w-full sm:w-auto flex items-center justify-between space-x-2 bg-white border border-zinc-200 px-4 py-2 rounded-xl text-sm font-bold text-zinc-900 shadow-sm hover:bg-zinc-50 transition-colors"
           >
             <div className="flex items-center">
-              <Calendar size={16} className="mr-2 text-zinc-400" />
+              <Calendar size={16} className="mr-2 text-zinc-500" />
               <span>{formatMonth(selectedMonth)}</span>
             </div>
             {isHistoryOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
           </button>
           
           {isHistoryOpen && (
-            <div className="absolute right-0 mt-2 w-full sm:w-48 bg-[#111] border border-zinc-800 rounded-xl shadow-xl z-50 overflow-hidden">
+            <div className="absolute right-0 mt-2 w-full sm:w-48 bg-white border border-zinc-200 rounded-xl shadow-xl z-50 overflow-hidden">
               <div className="max-h-60 overflow-y-auto">
                 {availableMonths.map(month => (
                   <button
@@ -176,7 +176,7 @@ export default function ResidentGuild() {
                       setSelectedMonth(month);
                       setIsHistoryOpen(false);
                     }}
-                    className={`w-full text-left px-4 py-2.5 text-sm font-medium hover:bg-brand-black transition-colors ${selectedMonth === month ? 'bg-brand-white text-brand-black hover:bg-gray-200' : 'text-zinc-300'}`}
+                    className={`w-full text-left px-4 py-2.5 text-sm font-medium hover:bg-zinc-50 transition-colors ${selectedMonth === month ? 'bg-zinc-900 text-white hover:bg-zinc-800' : 'text-zinc-600'}`}
                   >
                     {formatMonth(month)}
                   </button>
@@ -188,22 +188,22 @@ export default function ResidentGuild() {
       </div>
       
       {!userProfile?.guildId || !myGuild ? (
-        <div className="bg-[#111] rounded-2xl shadow-sm border border-zinc-800 p-10 text-center flex flex-col items-center justify-center min-h-[300px]">
-          <div className="w-16 h-16 bg-brand-black rounded-full flex items-center justify-center mb-4">
+        <div className="bg-white rounded-2xl shadow-sm border border-zinc-200 p-10 text-center flex flex-col items-center justify-center min-h-[300px]">
+          <div className="w-16 h-16 bg-zinc-50 rounded-full flex items-center justify-center mb-4">
             <Shield className="h-8 w-8 text-zinc-400" />
           </div>
-          <h3 className="text-lg font-bold text-brand-white">Нет гильдии</h3>
-          <p className="mt-2 text-sm text-zinc-400 max-w-sm mx-auto">Вы еще не состоите ни в одной гильдии. Обратитесь к администратору для распределения.</p>
+          <h3 className="text-lg font-bold text-zinc-900">Нет гильдии</h3>
+          <p className="mt-2 text-sm text-zinc-500 max-w-sm mx-auto">Вы еще не состоите ни в одной гильдии. Обратитесь к администратору для распределения.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* My Guild Info & Members */}
           <div className="lg:col-span-2 space-y-6">
-            <div className="bg-[#111] shadow-sm border border-zinc-800 rounded-2xl overflow-hidden">
-              <div className="px-6 py-6 border-b border-zinc-800/50 bg-brand-white text-brand-black flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div className="bg-white shadow-sm border border-zinc-200 rounded-2xl overflow-hidden">
+              <div className="px-6 py-6 border-b border-zinc-200 bg-zinc-900 text-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div className="flex items-center space-x-4">
-                  <div className="w-12 h-12 bg-[#111]/10 rounded-xl flex items-center justify-center backdrop-blur-sm">
-                    <Shield className="w-6 h-6 text-brand-black" />
+                  <div className="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-sm">
+                    <Shield className="w-6 h-6 text-white" />
                   </div>
                   <div>
                     <h3 className="text-xl font-bold tracking-tight">{myGuild.name}</h3>
@@ -221,9 +221,9 @@ export default function ResidentGuild() {
                     </div>
                   </div>
                 </div>
-                <div className="bg-[#111]/10 px-4 py-2 rounded-xl backdrop-blur-sm border border-white/10">
-                  <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-0.5">Очки за {selectedMonth === currentMonthId ? 'этот месяц' : formatMonth(selectedMonth)}</p>
-                  <p className="text-2xl font-bold text-brand-black flex items-center">
+                <div className="bg-white/10 px-4 py-2 rounded-xl backdrop-blur-sm border border-white/10">
+                  <p className="text-[10px] font-bold text-zinc-300 uppercase tracking-wider mb-0.5">Очки за {selectedMonth === currentMonthId ? 'этот месяц' : formatMonth(selectedMonth)}</p>
+                  <p className="text-2xl font-bold text-white flex items-center">
                     <Trophy size={20} className="mr-2 text-amber-400" />
                     {(guildMonthlyScores[myGuild.id] || 0).toFixed(1)}
                   </p>
@@ -236,34 +236,34 @@ export default function ResidentGuild() {
                   const progress = member.totalCodes > 0 ? (member.completedCodes / member.totalCodes) * 100 : 0;
                   
                   return (
-                    <li key={member.uid} className={`px-6 py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all ${isMe ? 'bg-brand-black border-l-4 border-zinc-900' : 'hover:bg-brand-black/50 border-l-4 border-transparent'}`}>
+                    <li key={member.uid} className={`px-6 py-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all ${isMe ? 'bg-zinc-900 border-l-4 border-zinc-900' : 'hover:bg-zinc-50 border-l-4 border-transparent'}`}>
                       <div className="flex items-center">
                         <div className={`flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-xl font-bold mr-4 shadow-sm ${
-                          index === 0 ? 'bg-amber-900/20 text-amber-400 ring-2 ring-amber-900/50' :
-                          index === 1 ? 'bg-zinc-800 text-zinc-300' :
-                          index === 2 ? 'bg-orange-900/20 text-orange-400' :
-                          'bg-[#111] text-zinc-400 border border-zinc-800'
+                          index === 0 ? 'bg-amber-50 text-amber-600 border border-amber-200' :
+                          index === 1 ? 'bg-zinc-100 text-zinc-600' :
+                          index === 2 ? 'bg-orange-50 text-orange-600 border border-orange-200' :
+                          'bg-white text-zinc-500 border border-zinc-200'
                         }`}>
                           {index + 1}
                         </div>
                         <div>
-                          <p className="text-sm font-bold text-brand-white flex items-center">
+                          <p className={`text-sm font-bold flex items-center ${isMe ? 'text-white' : 'text-zinc-900'}`}>
                             {member.name}
-                            {isMe && <span className="ml-2 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-brand-white text-brand-black">Вы</span>}
+                            {isMe && <span className="ml-2 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-white text-zinc-900">Вы</span>}
                           </p>
-                          <p className="text-xs font-medium text-zinc-400 mt-0.5">@{member.login}</p>
+                          <p className="text-xs font-medium text-zinc-500 mt-0.5">@{member.login}</p>
                         </div>
                       </div>
                       <div className="sm:text-right w-full sm:w-48 pl-14 sm:pl-0">
                         <div className="flex justify-between items-center mb-2">
-                          <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Прогресс</span>
-                          <p className="text-xs font-bold text-brand-white">
-                            {progress.toFixed(0)}% <span className="text-zinc-400 font-medium ml-1">({member.completedCodes.toFixed(1)} / {member.totalCodes})</span>
+                          <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Прогресс</span>
+                          <p className={`text-xs font-bold ${isMe ? 'text-white' : 'text-zinc-900'}`}>
+                            {progress.toFixed(0)}% <span className={`${isMe ? 'text-zinc-300' : 'text-zinc-500'} font-medium ml-1`}>({member.completedCodes.toFixed(1)} / {member.totalCodes})</span>
                           </p>
                         </div>
-                        <div className="w-full h-2 bg-zinc-800/50 rounded-full overflow-hidden shadow-inner">
+                        <div className="w-full h-2 bg-zinc-100 rounded-full overflow-hidden shadow-inner">
                           <div 
-                            className={`h-full rounded-full transition-all duration-1000 ease-out ${progress === 100 ? 'bg-emerald-500' : 'bg-brand-white'}`} 
+                            className={`h-full rounded-full transition-all duration-1000 ease-out ${progress === 100 ? 'bg-emerald-500' : 'bg-zinc-900'}`} 
                             style={{ width: `${progress}%` }}
                           />
                         </div>
@@ -277,13 +277,13 @@ export default function ResidentGuild() {
 
           {/* Global Rankings */}
           <div className="space-y-6">
-            <div className="bg-[#111] shadow-sm border border-zinc-800 rounded-2xl overflow-hidden sticky top-24">
-              <div className="px-6 py-5 border-b border-zinc-800/50 bg-brand-black/50">
-                <h3 className="text-lg font-bold text-brand-white flex items-center">
+            <div className="bg-white shadow-sm border border-zinc-200 rounded-2xl overflow-hidden sticky top-24">
+              <div className="px-6 py-5 border-b border-zinc-200 bg-zinc-50">
+                <h3 className="text-lg font-bold text-zinc-900 flex items-center">
                   <Trophy className="mr-2.5 text-amber-500" size={20} />
                   Рейтинг гильдий
                 </h3>
-                <p className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider mt-1">
+                <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider mt-1">
                   За {formatMonth(selectedMonth)}
                 </p>
               </div>
@@ -292,17 +292,17 @@ export default function ResidentGuild() {
                   const isMyGuild = guild.id === myGuild.id;
                   const monthlyScore = guildMonthlyScores[guild.id] || 0;
                   return (
-                    <li key={guild.id} className={`px-6 py-4 flex items-center justify-between transition-colors ${isMyGuild ? 'bg-brand-white text-brand-black' : 'hover:bg-brand-black/50'}`}>
+                    <li key={guild.id} className={`px-6 py-4 flex items-center justify-between transition-colors ${isMyGuild ? 'bg-zinc-900 text-white' : 'hover:bg-zinc-50'}`}>
                       <div className="flex items-center">
-                        {index === 0 ? <Medal className={`mr-3 ${isMyGuild ? 'text-amber-600' : 'text-amber-500'}`} size={20} /> :
-                         index === 1 ? <Medal className={`mr-3 ${isMyGuild ? 'text-zinc-500' : 'text-zinc-400'}`} size={20} /> :
-                         index === 2 ? <Medal className={`mr-3 ${isMyGuild ? 'text-orange-600' : 'text-orange-500'}`} size={20} /> :
-                         <span className={`w-5 text-center font-bold mr-3 ${isMyGuild ? 'text-zinc-500' : 'text-zinc-400'}`}>{index + 1}</span>}
-                        <span className={`text-sm font-bold ${isMyGuild ? 'text-brand-black' : 'text-brand-white'}`}>
+                        {index === 0 ? <Medal className={`mr-3 ${isMyGuild ? 'text-amber-400' : 'text-amber-500'}`} size={20} /> :
+                         index === 1 ? <Medal className={`mr-3 ${isMyGuild ? 'text-zinc-300' : 'text-zinc-400'}`} size={20} /> :
+                         index === 2 ? <Medal className={`mr-3 ${isMyGuild ? 'text-orange-400' : 'text-orange-500'}`} size={20} /> :
+                         <span className={`w-5 text-center font-bold mr-3 ${isMyGuild ? 'text-zinc-300' : 'text-zinc-400'}`}>{index + 1}</span>}
+                        <span className={`text-sm font-bold ${isMyGuild ? 'text-white' : 'text-zinc-900'}`}>
                           {guild.name}
                         </span>
                       </div>
-                      <span className={`text-sm font-bold ${isMyGuild ? 'text-brand-black' : 'text-brand-white'}`}>
+                      <span className={`text-sm font-bold ${isMyGuild ? 'text-white' : 'text-zinc-900'}`}>
                         {monthlyScore.toFixed(1)}
                       </span>
                     </li>

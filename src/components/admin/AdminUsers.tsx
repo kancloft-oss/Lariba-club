@@ -6,6 +6,7 @@ import { db, auth, handleFirestoreError, OperationType } from '../../firebase';
 import firebaseConfig from '../../../firebase-applet-config.json';
 import { UserProfile, Tariff } from '../../contexts/AuthContext';
 import { Plus, Edit2, Trash2, X, Search, Key } from 'lucide-react';
+import { TariffBadge } from '../TariffBadge';
 
 // Initialize a secondary app for user creation to prevent logging out the admin
 const secondaryApp = initializeApp(firebaseConfig, 'SecondaryApp');
@@ -232,17 +233,12 @@ export default function AdminUsers() {
                   <div className="text-sm text-zinc-500">{user.login}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
-                    ${user.tariff === 'Richer' ? 'bg-purple-100 text-purple-700' : 
-                      user.tariff === 'Lemoner' ? 'bg-yellow-100 text-yellow-700' : 
-                      'bg-emerald-100 text-emerald-700'}`}>
-                    {user.tariff}
-                  </span>
+                  <TariffBadge tariff={user.tariff} />
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex flex-col">
                     <span className={`px-2.5 py-1 inline-flex text-xs leading-5 font-semibold rounded-full w-fit
-                      ${user.paymentStatus === 'paid' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
+                      ${user.paymentStatus === 'paid' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-rose-50 text-rose-700 border border-rose-100'}`}>
                       {user.paymentStatus === 'paid' ? 'Оплачено' : 'Не оплачено'}
                     </span>
                     {user.paymentDueDate && (
@@ -290,14 +286,9 @@ export default function AdminUsers() {
             </div>
             
             <div className="flex flex-wrap gap-2 items-center">
+              <TariffBadge tariff={user.tariff} />
               <span className={`px-2.5 py-1 text-xs font-semibold rounded-full 
-                ${user.tariff === 'Richer' ? 'bg-purple-100 text-purple-700' : 
-                  user.tariff === 'Lemoner' ? 'bg-yellow-100 text-yellow-700' : 
-                  'bg-emerald-100 text-emerald-700'}`}>
-                {user.tariff}
-              </span>
-              <span className={`px-2.5 py-1 text-xs font-semibold rounded-full 
-                ${user.paymentStatus === 'paid' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}`}>
+                ${user.paymentStatus === 'paid' ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-rose-50 text-rose-700 border border-rose-100'}`}>
                 {user.paymentStatus === 'paid' ? 'Оплачено' : 'Не оплачено'}
               </span>
             </div>
