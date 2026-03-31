@@ -5,8 +5,9 @@ import { useAuth } from '../../contexts/AuthContext';
 import { Event } from '../admin/AdminEvents';
 import { Code } from '../admin/AdminCodes';
 import { Guild } from '../admin/AdminGuilds';
-import { Calendar as CalendarIcon, CheckCircle2, Trophy, Camera, Shield } from 'lucide-react';
+import { CheckCircle2, Trophy, Camera, Shield } from 'lucide-react';
 import { TariffBadge } from '../TariffBadge';
+import ResidentCalendar from './ResidentCalendar';
 
 import { updateGuildScore } from '../../utils/guildScores';
 
@@ -154,37 +155,13 @@ export default function ResidentHome() {
         </div>
       </div>
 
-      {/* Events List */}
+      {/* Events Calendar */}
       <div className="bg-white rounded-3xl p-6 shadow-sm border border-zinc-200 space-y-4">
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-lg font-bold text-zinc-900">Ближайшие события</h3>
+          <h3 className="text-lg font-bold text-zinc-900">Календарь событий</h3>
         </div>
         
-        <div className="space-y-3">
-          {events.length === 0 ? (
-            <div className="bg-zinc-50 rounded-2xl p-6 text-center border border-zinc-200">
-              <CalendarIcon className="w-8 h-8 text-zinc-400 mx-auto mb-2" />
-              <p className="text-sm font-medium text-zinc-500">Нет предстоящих событий</p>
-            </div>
-          ) : (
-            events.slice(0, 5).map(event => (
-              <div key={event.id} className="bg-zinc-50 p-4 rounded-2xl flex items-start space-x-4 border border-zinc-200 hover:border-zinc-300 transition-colors">
-                <div className="w-12 h-12 rounded-xl bg-white flex flex-col items-center justify-center flex-shrink-0 shadow-sm border border-zinc-200">
-                  <span className="text-[10px] font-bold text-rose-600 uppercase">
-                    {new Date(event.date).toLocaleDateString('ru-RU', { month: 'short' }).replace('.', '')}
-                  </span>
-                  <span className="text-lg font-bold text-zinc-900 leading-none mt-0.5">
-                    {new Date(event.date).getDate()}
-                  </span>
-                </div>
-                <div className="flex-1 min-w-0 pt-0.5">
-                  <h4 className="text-sm font-bold text-zinc-900 truncate">{event.title}</h4>
-                  <p className="text-xs text-zinc-500 mt-1 line-clamp-2">{event.description}</p>
-                </div>
-              </div>
-            ))
-          )}
-        </div>
+        <ResidentCalendar events={events} />
       </div>
 
       {/* Code Tracker & Guild Summary */}

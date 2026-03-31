@@ -32,3 +32,21 @@ body {
   scrollbar-width: none;
 }
 
+.react-calendar {
+  border: none !important;
+  font-family: var(--font-sans) !important;
+  width: 100% !important;
+}
+.react-calendar__tile--now {
+  background: #f4f4f5 !important;
+  border-radius: 8px;
+}
+.react-calendar__tile--active {
+  background: #18181b !important;
+  color: white !important;
+  border-radius: 8px;
+}
+.react-calendar__navigation button {
+  font-weight: bold;
+}
+
