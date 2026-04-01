@@ -16,13 +16,9 @@ async function startServer() {
 
   console.log(`Starting server in ${isProd ? 'PRODUCTION' : 'DEVELOPMENT'} mode...`);
 
-  const uploadDir = path.join(__dirname, 'uploads');
-  if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir, { recursive: true });
-  }
-
+  // Use memory storage to avoid permission issues with local filesystem on cloud providers
   const upload = multer({ 
-    dest: uploadDir,
+    storage: multer.memoryStorage(),
     limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
   });
 
@@ -54,9 +50,9 @@ async function startServer() {
       return res.status(500).send('S3 configuration missing');
     }
 
-    const fileContent = fs.readFileSync(req.file.path);
+    const fileContent = req.file.buffer;
     const extension = path.extname(req.file.originalname) || '.jpg';
-    const key = `avatars/${req.file.filename}${extension}`;
+    const key = `avatars/${Date.now()}-${req.file.originalname.replace(/[^a-zA-Z0-9.]/g, '_')}`;
     
     const params = {
       Bucket: process.env.S3_BUCKET,
@@ -67,7 +63,6 @@ async function startServer() {
 
     try {
       await s3Client.send(new PutObjectCommand(params));
-      fs.unlinkSync(req.file.path);
       
       const endpoint = process.env.S3_ENDPOINT || 'https://s3.twcstorage.ru';
       const bucket = process.env.S3_BUCKET;
@@ -76,7 +71,6 @@ async function startServer() {
       res.json({ url: fileUrl });
     } catch (error) {
       console.error('S3 upload error details:', error);
-      if (fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
       res.status(500).send('Upload failed: ' + (error instanceof Error ? error.message : 'Unknown error'));
     }
   });
