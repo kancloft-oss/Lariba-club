@@ -12,9 +12,16 @@ const __dirname = path.dirname(__filename);
 async function startServer() {
   const app = express();
   const PORT = process.env.PORT || 3000;
-  const isProd = process.env.NODE_ENV === 'production';
+  
+  // Check if we are in production
+  const distPath = path.join(__dirname, 'dist');
+  const distExists = fs.existsSync(distPath);
+  const isProd = process.env.NODE_ENV === 'production' || distExists;
 
   console.log(`Starting server in ${isProd ? 'PRODUCTION' : 'DEVELOPMENT'} mode...`);
+  if (isProd && !distExists) {
+    console.warn('WARNING: NODE_ENV is production but "dist" directory is missing!');
+  }
 
   // Use memory storage to avoid permission issues with local filesystem on cloud providers
   const upload = multer({ 
@@ -100,9 +107,8 @@ async function startServer() {
     app.use(vite.middlewares);
   } else {
     // Serve static files from the React build directory in production
-    const distPath = path.join(__dirname, 'dist');
     console.log(`Serving static files from: ${distPath}`);
-    if (fs.existsSync(distPath)) {
+    if (distExists) {
       app.use(express.static(distPath));
       app.get('*', (req, res) => {
         res.sendFile(path.join(distPath, 'index.html'));
