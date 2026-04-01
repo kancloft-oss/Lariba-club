@@ -53,32 +53,42 @@ export default function ResidentCalendar({ events }: ResidentCalendarProps) {
             <div className="space-y-3">
               {selectedEvents.map(event => (
                 <div key={event.id} className="bg-white rounded-2xl p-5 shadow-sm border border-zinc-200 space-y-3">
-                  <div className="flex justify-between items-start">
+                  <div className="flex justify-between items-start gap-4">
                     <h5 className="font-bold text-zinc-900 text-lg leading-tight">{event.title}</h5>
-                    <span className="px-3 py-1 bg-zinc-100 text-zinc-900 rounded-full text-[10px] font-bold uppercase tracking-wider">
-                      {event.type}
-                    </span>
+                    {event.type && (
+                      <span className="shrink-0 px-3 py-1 bg-zinc-100 text-zinc-900 rounded-full text-[10px] font-bold uppercase tracking-wider">
+                        {event.type}
+                      </span>
+                    )}
                   </div>
                   
-                  <p className="text-sm text-zinc-600 leading-relaxed">{event.description}</p>
+                  {event.description && (
+                    <p className="text-sm text-zinc-600 leading-relaxed">{event.description}</p>
+                  )}
                   
-                  <div className="flex flex-wrap gap-4 pt-2">
-                    <div className="flex items-center text-zinc-500 text-xs">
-                      <Clock size={14} className="mr-1.5" />
-                      {event.time}
+                  {(event.time || event.location) && (
+                    <div className="flex flex-wrap gap-4 pt-1">
+                      {event.time && (
+                        <div className="flex items-center text-zinc-500 text-xs">
+                          <Clock size={14} className="mr-1.5" />
+                          {event.time}
+                        </div>
+                      )}
+                      {event.location && (
+                        <div className="flex items-center text-zinc-500 text-xs">
+                          <MapPin size={14} className="mr-1.5" />
+                          {event.location}
+                        </div>
+                      )}
                     </div>
-                    <div className="flex items-center text-zinc-500 text-xs">
-                      <MapPin size={14} className="mr-1.5" />
-                      {event.location}
-                    </div>
-                  </div>
+                  )}
 
                   {event.link && (
                     <a 
                       href={event.link} 
                       target="_blank" 
                       rel="noopener noreferrer"
-                      className="inline-flex items-center space-x-2 text-zinc-900 font-bold text-sm hover:underline pt-2"
+                      className="inline-flex items-center space-x-2 text-zinc-900 font-bold text-sm hover:underline pt-1"
                     >
                       <span>Подробнее</span>
                       <ExternalLink size={14} />
