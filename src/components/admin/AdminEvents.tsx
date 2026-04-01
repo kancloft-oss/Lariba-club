@@ -10,6 +10,10 @@ export interface Event {
   title: string;
   description: string;
   date: string;
+  time: string;
+  location: string;
+  type: string;
+  link?: string;
   tariffs: Tariff[];
   createdAt: string;
 }
@@ -23,6 +27,10 @@ export default function AdminEvents() {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [date, setDate] = useState('');
+  const [time, setTime] = useState('');
+  const [location, setLocation] = useState('');
+  const [type, setType] = useState('');
+  const [link, setLink] = useState('');
   const [selectedTariffs, setSelectedTariffs] = useState<Tariff[]>([]);
   const [error, setError] = useState('');
 
@@ -43,6 +51,10 @@ export default function AdminEvents() {
     setTitle('');
     setDescription('');
     setDate('');
+    setTime('');
+    setLocation('');
+    setType('');
+    setLink('');
     setSelectedTariffs([]);
     setError('');
     setEditingEvent(null);
@@ -53,7 +65,11 @@ export default function AdminEvents() {
       setEditingEvent(event);
       setTitle(event.title);
       setDescription(event.description);
-      setDate(event.date.split('T')[0]); // Assuming date is ISO string, get YYYY-MM-DD
+      setDate(event.date.split('T')[0]);
+      setTime(event.time || '');
+      setLocation(event.location || '');
+      setType(event.type || '');
+      setLink(event.link || '');
       setSelectedTariffs(event.tariffs);
     } else {
       resetForm();
@@ -88,6 +104,10 @@ export default function AdminEvents() {
           title,
           description,
           date: new Date(date).toISOString(),
+          time,
+          location,
+          type,
+          link,
           tariffs: selectedTariffs
         });
       } else {
@@ -96,6 +116,10 @@ export default function AdminEvents() {
           title,
           description,
           date: new Date(date).toISOString(),
+          time,
+          location,
+          type,
+          link,
           tariffs: selectedTariffs,
           createdAt: new Date().toISOString()
         });
@@ -198,9 +222,27 @@ export default function AdminEvents() {
                     <label className="block text-sm font-medium text-zinc-700 mb-1.5">Название</label>
                     <input type="text" required value={title} onChange={(e) => setTitle(e.target.value)} className="block w-full border border-zinc-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-zinc-900 focus:border-zinc-900 sm:text-sm transition-all" />
                   </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-zinc-700 mb-1.5">Тип (напр. Вебинар)</label>
+                      <input type="text" required value={type} onChange={(e) => setType(e.target.value)} className="block w-full border border-zinc-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-zinc-900 focus:border-zinc-900 sm:text-sm transition-all" />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-zinc-700 mb-1.5">Время</label>
+                      <input type="text" required placeholder="18:00" value={time} onChange={(e) => setTime(e.target.value)} className="block w-full border border-zinc-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-zinc-900 focus:border-zinc-900 sm:text-sm transition-all" />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-zinc-700 mb-1.5">Место / Платформа</label>
+                    <input type="text" required value={location} onChange={(e) => setLocation(e.target.value)} className="block w-full border border-zinc-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-zinc-900 focus:border-zinc-900 sm:text-sm transition-all" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-zinc-700 mb-1.5">Ссылка (необязательно)</label>
+                    <input type="url" value={link} onChange={(e) => setLink(e.target.value)} className="block w-full border border-zinc-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-zinc-900 focus:border-zinc-900 sm:text-sm transition-all" />
+                  </div>
                   <div>
                     <label className="block text-sm font-medium text-zinc-700 mb-1.5">Описание</label>
-                    <textarea required value={description} onChange={(e) => setDescription(e.target.value)} rows={4} className="block w-full border border-zinc-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-zinc-900 focus:border-zinc-900 sm:text-sm transition-all resize-none" />
+                    <textarea required value={description} onChange={(e) => setDescription(e.target.value)} rows={3} className="block w-full border border-zinc-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-zinc-900 focus:border-zinc-900 sm:text-sm transition-all resize-none" />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-zinc-700 mb-1.5">Дата</label>

@@ -1,26 +1,116 @@
+import 'dotenv/config';
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import multer from 'multer';
+import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
+import fs from 'fs';
+import { createServer as createViteServer } from 'vite';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const app = express();
-const PORT = process.env.PORT || 3000;
+async function startServer() {
+  const app = express();
+  const PORT = process.env.PORT || 3000;
 
-// Serve static files from the React build directory
-app.use(express.static(path.join(__dirname, 'dist')));
+  const uploadDir = path.join(__dirname, 'uploads');
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+  }
 
-// API routes can be added here if needed
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok' });
-});
+  const upload = multer({ 
+    dest: uploadDir,
+    limits: { fileSize: 10 * 1024 * 1024 } // 10MB limit
+  });
 
-// Handle React routing, return all requests to React app
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'dist', 'index.html'));
-});
+  const s3Client = new S3Client({
+    endpoint: process.env.S3_ENDPOINT || 'https://s3.twcstorage.ru',
+    region: 'ru-1',
+    credentials: {
+      accessKeyId: process.env.S3_ACCESS_KEY || '',
+      secretAccessKey: process.env.S3_SECRET_KEY || '',
+    },
+    forcePathStyle: true,
+  });
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+  // API routes FIRST
+  app.post('/api/upload-avatar', (req, res, next) => {
+    upload.single('avatar')(req, res, (err) => {
+      if (err) {
+        console.error('Multer error:', err);
+        return res.status(400).send(`Multer error: ${err.message}`);
+      }
+      next();
+    });
+  }, async (req, res) => {
+    console.log('Received upload request:', req.file ? `File: ${req.file.originalname}` : 'No file');
+    if (!req.file) return res.status(400).send('No file uploaded.');
+
+    if (!process.env.S3_ACCESS_KEY || !process.env.S3_SECRET_KEY || !process.env.S3_BUCKET) {
+      console.error('S3 credentials or bucket missing in environment variables');
+      return res.status(500).send('S3 configuration missing');
+    }
+
+    const fileContent = fs.readFileSync(req.file.path);
+    const extension = path.extname(req.file.originalname) || '.jpg';
+    const key = `avatars/${req.file.filename}${extension}`;
+    
+    const params = {
+      Bucket: process.env.S3_BUCKET,
+      Key: key,
+      Body: fileContent,
+      ContentType: req.file.mimetype,
+    };
+
+    try {
+      await s3Client.send(new PutObjectCommand(params));
+      fs.unlinkSync(req.file.path);
+      
+      const endpoint = process.env.S3_ENDPOINT || 'https://s3.twcstorage.ru';
+      const bucket = process.env.S3_BUCKET;
+      const fileUrl = `${endpoint}/${bucket}/${key}`;
+      
+      res.json({ url: fileUrl });
+    } catch (error) {
+      console.error('S3 upload error details:', error);
+      if (fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+      res.status(500).send('Upload failed: ' + (error instanceof Error ? error.message : 'Unknown error'));
+    }
+  });
+
+  app.get('/api/debug-s3', (req, res) => {
+    res.json({
+      endpoint: process.env.S3_ENDPOINT || 'https://s3.twcstorage.ru',
+      bucket: process.env.S3_BUCKET ? 'Set' : 'Not Set',
+      accessKey: process.env.S3_ACCESS_KEY ? `${process.env.S3_ACCESS_KEY.slice(0, 4)}...` : 'Not Set',
+      secretKey: process.env.S3_SECRET_KEY ? 'Set' : 'Not Set',
+      nodeEnv: process.env.NODE_ENV,
+    });
+  });
+
+  app.get('/api/health', (req, res) => {
+    res.json({ status: 'ok' });
+  });
+
+  // Vite middleware for development
+  if (process.env.NODE_ENV !== 'production') {
+    const vite = await createViteServer({
+      server: { middlewareMode: true },
+      appType: 'spa',
+    });
+    app.use(vite.middlewares);
+  } else {
+    // Serve static files from the React build directory in production
+    app.use(express.static(path.join(__dirname, 'dist')));
+    app.get('*', (req, res) => {
+      res.sendFile(path.join(__dirname, 'dist', 'index.html'));
+    });
+  }
+
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
+}
+
+startServer();

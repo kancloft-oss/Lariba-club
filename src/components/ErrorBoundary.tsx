@@ -34,10 +34,21 @@ export class ErrorBoundary extends React.Component<Props, State> {
   }
 
   handleGlobalError = (event: ErrorEvent) => {
+    // Ignore benign Vite/WebSocket errors
+    const message = event.message || (event.error && event.error.message) || "";
+    if (message.includes('[vite]') || message.includes('WebSocket')) {
+      return;
+    }
     this.setState({ hasError: true, error: event.error });
   };
 
   handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+    // Ignore benign Vite/WebSocket rejections
+    const reason = event.reason;
+    const message = reason instanceof Error ? reason.message : String(reason);
+    if (message.includes('[vite]') || message.includes('WebSocket')) {
+      return;
+    }
     this.setState({ hasError: true, error: event.reason instanceof Error ? event.reason : new Error(String(event.reason)) });
   };
 

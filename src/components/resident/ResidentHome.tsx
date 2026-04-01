@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { collection, onSnapshot, query, where, doc, updateDoc } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { db, storage, handleFirestoreError, OperationType } from '../../firebase';
+import { db, handleFirestoreError, OperationType } from '../../firebase';
 import { useAuth } from '../../contexts/AuthContext';
 import { Event } from '../admin/AdminEvents';
 import { Code } from '../admin/AdminCodes';
@@ -103,17 +102,26 @@ export default function ResidentHome() {
           if (!blob) return;
 
           try {
-            const avatarRef = ref(storage, `avatars/${userProfile.uid}`);
-            await uploadBytes(avatarRef, blob);
-            const downloadURL = await getDownloadURL(avatarRef);
+            const formData = new FormData();
+            formData.append('avatar', blob, 'avatar.jpg');
+
+            const response = await fetch('/api/upload-avatar', {
+              method: 'POST',
+              body: formData
+            });
+
+            if (!response.ok) {
+              const errorText = await response.text();
+              throw new Error(errorText || 'Upload failed');
+            }
+
+            const { url } = await response.json();
 
             await updateDoc(doc(db, 'users', userProfile.uid), {
-              avatarUrl: downloadURL
+              avatarUrl: url
             });
           } catch (err) {
             console.error('Avatar upload error:', err);
-            // We need to handle storage errors too, but handleFirestoreError is for firestore.
-            // For now, let's just alert.
             alert('Ошибка при загрузке аватара');
           }
         }, 'image/jpeg', 0.7);
@@ -192,11 +200,8 @@ export default function ResidentHome() {
       </div>
 
       {/* Events Calendar */}
-      <div className="bg-white rounded-3xl p-6 shadow-sm border border-zinc-200 space-y-4">
-        <div className="flex items-center justify-between mb-2">
-          <h3 className="text-lg font-bold text-zinc-900">Календарь событий</h3>
-        </div>
-        
+      <div className="space-y-4">
+        <h3 className="text-lg font-bold text-zinc-900 px-2">Календарь событий</h3>
         <ResidentCalendar events={events} />
       </div>
 

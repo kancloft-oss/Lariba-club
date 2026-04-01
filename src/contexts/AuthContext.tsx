@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User as FirebaseUser, onAuthStateChanged, signOut } from 'firebase/auth';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, onSnapshot } from 'firebase/firestore';
 import { auth, db, handleFirestoreError, OperationType } from '../firebase';
 
 export type UserRole = 'admin' | 'resident';
@@ -42,15 +42,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+    let unsubscribeProfile: (() => void) | null = null;
+
+    const unsubscribeAuth = onAuthStateChanged(auth, async (user) => {
       setCurrentUser(user);
+      
+      if (unsubscribeProfile) {
+        unsubscribeProfile();
+        unsubscribeProfile = null;
+      }
+
       if (user) {
-        try {
-          const docRef = doc(db, 'users', user.uid);
-          const docSnap = await getDoc(docRef);
-          
+        const docRef = doc(db, 'users', user.uid);
+        
+        unsubscribeProfile = onSnapshot(docRef, async (docSnap) => {
           if (docSnap.exists()) {
             setUserProfile(docSnap.data() as UserProfile);
+            setLoading(false);
           } else {
             // Auto-create profile for the first admin
             const isAdminEmail = user.email === 'admin@lariba.local' || (user.email === 'kancloft@gmail.com' && user.emailVerified);
@@ -65,23 +73,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 createdAt: new Date().toISOString()
               };
               await setDoc(docRef, newProfile);
-              setUserProfile(newProfile);
+              // onSnapshot will fire again with the new data
             } else {
               // If no profile exists and it's not the admin, log them out
               await signOut(auth);
               setUserProfile(null);
+              setLoading(false);
             }
           }
-        } catch (error) {
+        }, (error) => {
           handleFirestoreError(error, OperationType.GET, `users/${user.uid}`);
-        }
+          setLoading(false);
+        });
       } else {
         setUserProfile(null);
+        setLoading(false);
       }
-      setLoading(false);
     });
 
-    return unsubscribe;
+    return () => {
+      unsubscribeAuth();
+      if (unsubscribeProfile) unsubscribeProfile();
+    };
   }, []);
 
   const logout = () => signOut(auth);

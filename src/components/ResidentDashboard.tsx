@@ -70,8 +70,7 @@ export default function ResidentDashboard() {
       {/* Mobile Header */}
       <div className="md:hidden bg-white/80 backdrop-blur-md border-b border-zinc-200 p-4 sticky top-0 z-20 flex justify-between items-center">
         <div>
-          <img src="/logo.svg" alt="Laribaclub" className="h-8 w-auto rounded-lg shadow-sm mb-1" />
-          <p className="text-[10px] font-medium text-zinc-500 uppercase tracking-wider ml-0.5">Клуб</p>
+          <img src="/logo.svg" alt="Laribaclub" className="h-8 w-auto rounded-lg shadow-sm" />
         </div>
         <button onClick={logout} className="p-2 text-zinc-500 hover:text-zinc-900 bg-zinc-100 rounded-full">
           <LogOut size={18} />
