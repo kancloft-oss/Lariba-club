@@ -49,12 +49,16 @@ service cloud.firestore {
     }
 
     function isValidEvent(data) {
-      return hasOnlyAllowedFields(['title', 'description', 'date', 'tariffs', 'createdAt']) &&
+      return hasOnlyAllowedFields(['title', 'description', 'date', 'tariffs', 'createdAt', 'time', 'location', 'type', 'link']) &&
              data.title is string && data.title.size() > 0 && data.title.size() < 200 &&
              data.description is string && data.description.size() < 2000 &&
              data.date is string && data.date.size() < 100 &&
              data.tariffs is list && data.tariffs.size() <= 3 &&
-             data.createdAt is string;
+             data.createdAt is string &&
+             data.time is string && data.time.size() > 0 && data.time.size() < 20 &&
+             data.location is string && data.location.size() > 0 && data.location.size() < 200 &&
+             data.type is string && data.type.size() > 0 && data.type.size() < 100 &&
+             (!('link' in data) || data.link is string && data.link.size() < 500);
     }
 
     function isValidCode(data) {

@@ -31,8 +31,17 @@ export default function AdminEvents() {
   const [location, setLocation] = useState('');
   const [type, setType] = useState('');
   const [link, setLink] = useState('');
+  const [filter, setFilter] = useState<'actual' | 'archive'>('actual');
+  const [tariffFilter, setTariffFilter] = useState<Tariff | 'all'>('all');
   const [selectedTariffs, setSelectedTariffs] = useState<Tariff[]>([]);
   const [error, setError] = useState('');
+
+  const filteredEvents = events.filter(event => {
+    const isArchive = new Date(event.date) < new Date(new Date().setHours(0, 0, 0, 0));
+    const matchesFilter = filter === 'actual' ? !isArchive : isArchive;
+    const matchesTariff = tariffFilter === 'all' || event.tariffs.includes(tariffFilter);
+    return matchesFilter && matchesTariff;
+  });
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'events'), (snapshot) => {
@@ -149,6 +158,18 @@ export default function AdminEvents() {
     <div className="space-y-6 pb-20 md:pb-0">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h2 className="text-2xl font-bold text-zinc-900 tracking-tight">Мероприятия</h2>
+        <div className="flex gap-2">
+          <select value={filter} onChange={(e) => setFilter(e.target.value as 'actual' | 'archive')} className="border border-zinc-200 rounded-xl px-4 py-2.5">
+            <option value="actual">Актуальные</option>
+            <option value="archive">Архив</option>
+          </select>
+          <select value={tariffFilter} onChange={(e) => setTariffFilter(e.target.value as Tariff | 'all')} className="border border-zinc-200 rounded-xl px-4 py-2.5">
+            <option value="all">Все тарифы</option>
+            <option value="Moneycan">Moneycan</option>
+            <option value="Lemoner">Lemoner</option>
+            <option value="Richer">Richer</option>
+          </select>
+        </div>
         <button
           onClick={() => handleOpenModal()}
           className="w-full sm:w-auto bg-zinc-900 text-white px-5 py-2.5 rounded-xl flex items-center justify-center space-x-2 hover:bg-zinc-800 transition-colors shadow-sm"
@@ -159,7 +180,7 @@ export default function AdminEvents() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {events.map((event) => (
+        {filteredEvents.map((event) => (
           <div key={event.id} className="bg-white rounded-3xl shadow-sm border border-zinc-200 overflow-hidden flex flex-col transition-all hover:shadow-md">
             <div className="p-6 flex-1 flex flex-col">
               <div className="flex justify-between items-start mb-4">
@@ -229,7 +250,7 @@ export default function AdminEvents() {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-zinc-700 mb-1.5">Время</label>
-                      <input type="text" required placeholder="18:00" value={time} onChange={(e) => setTime(e.target.value)} className="block w-full border border-zinc-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-zinc-900 focus:border-zinc-900 sm:text-sm transition-all" />
+                      <input type="time" required value={time} onChange={(e) => setTime(e.target.value)} className="block w-full border border-zinc-200 rounded-xl px-4 py-2.5 focus:ring-2 focus:ring-zinc-900 focus:border-zinc-900 sm:text-sm transition-all" />
                     </div>
                   </div>
                   <div>
