@@ -89,7 +89,7 @@ export default function ChatWindow({ chat, onBack }: ChatWindowProps) {
 
   const handleSendMessage = async (e?: React.FormEvent, attachmentData?: any) => {
     if (e) e.preventDefault();
-    if ((!newMessage.trim() && !attachmentData) || !userProfile || isSending) return;
+    if ((!newMessage.trim() && !attachmentData) || !userProfile) return;
 
     const text = newMessage.trim();
     setNewMessage('');
@@ -123,6 +123,7 @@ export default function ChatWindow({ chat, onBack }: ChatWindowProps) {
       scrollToBottom();
     } catch (error) {
       console.error("Error sending message:", error);
+      alert("Ошибка отправки сообщения: " + (error instanceof Error ? error.message : String(error)));
       setNewMessage(text); // restore text on error
     } finally {
       setIsSending(false);
@@ -144,6 +145,7 @@ export default function ChatWindow({ chat, onBack }: ChatWindowProps) {
       await handleSendMessage(undefined, attachmentData);
     } catch (error) {
       console.error("Error uploading file:", error);
+      alert("Ошибка загрузки файла: " + (error instanceof Error ? error.message : String(error)));
     } finally {
       setIsSending(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
@@ -169,6 +171,7 @@ export default function ChatWindow({ chat, onBack }: ChatWindowProps) {
           await handleSendMessage(undefined, attachmentData);
         } catch (error) {
           console.error("Error uploading audio:", error);
+          alert("Ошибка загрузки аудио: " + (error instanceof Error ? error.message : String(error)));
         } finally {
           setIsSending(false);
         }
