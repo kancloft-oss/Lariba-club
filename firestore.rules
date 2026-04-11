@@ -91,6 +91,36 @@ service cloud.firestore {
              data.lastUpdated is string;
     }
 
+    function isChatParticipant(chatData) {
+      return isAuthenticated() && (
+        isAdmin() ||
+        (chatData.type == 'tariff' && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.tariff == chatData.tariff) ||
+        (chatData.type in ['direct', 'group'] && request.auth.uid in chatData.participants)
+      );
+    }
+
+    function isValidChat(data) {
+      return hasOnlyAllowedFields(['type', 'name', 'tariff', 'participants', 'adminIds', 'lastMessage', 'updatedAt', 'createdAt']) &&
+             data.type in ['direct', 'group', 'tariff'] &&
+             (!('name' in data) || data.name is string && data.name.size() < 100) &&
+             (!('tariff' in data) || data.tariff in ['Moneycan', 'Lemoner', 'Richer']) &&
+             (!('participants' in data) || data.participants is list && data.participants.size() < 1000) &&
+             (!('adminIds' in data) || data.adminIds is list && data.adminIds.size() < 100) &&
+             (!('lastMessage' in data) || data.lastMessage is map) &&
+             (!('updatedAt' in data) || data.updatedAt is string) &&
+             (!('createdAt' in data) || data.createdAt is string);
+    }
+
+    function isValidMessage(data) {
+      return hasOnlyAllowedFields(['text', 'senderId', 'createdAt', 'readBy', 'attachment']) &&
+             (('text' in data && data.text is string && data.text.size() > 0 && data.text.size() < 5000) || ('attachment' in data && data.attachment is map)) &&
+             (!('text' in data) || (data.text is string && data.text.size() < 5000)) &&
+             data.senderId is string && data.senderId.size() > 0 && data.senderId.size() < 100 &&
+             data.createdAt is string &&
+             (!('readBy' in data) || data.readBy is list && data.readBy.size() < 1000) &&
+             (!('attachment' in data) || data.attachment is map);
+    }
+
     // ===============================================================
     // Rules
     // ===============================================================
@@ -178,6 +208,38 @@ service cloud.firestore {
            isValidMonthlyScore(request.resource.data) &&
            request.resource.data.diff(resource.data).affectedKeys().hasOnly(['score', 'lastUpdated']))
         );
+      }
+    }
+
+    match /chats/{chatId} {
+      allow read: if isChatParticipant(resource.data);
+      
+      allow create: if isAuthenticated() && isValidChat(request.resource.data) && (
+        isAdmin() || 
+        (request.resource.data.type == 'direct' && request.auth.uid in request.resource.data.participants)
+      );
+      
+      allow update: if isChatParticipant(resource.data) && isValidChat(request.resource.data) && (
+        isAdmin() || 
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['lastMessage', 'updatedAt'])
+      );
+      
+      allow delete: if isAdmin();
+
+      match /messages/{messageId} {
+        allow read: if isChatParticipant(get(/databases/$(database)/documents/chats/$(chatId)).data);
+        
+        allow create: if isChatParticipant(get(/databases/$(database)/documents/chats/$(chatId)).data) && 
+                      isValidMessage(request.resource.data) && 
+                      request.resource.data.senderId == request.auth.uid;
+                      
+        allow update: if isChatParticipant(get(/databases/$(database)/documents/chats/$(chatId)).data) && 
+                      isValidMessage(request.resource.data) && (
+                        request.auth.uid == resource.data.senderId || 
+                        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['readBy'])
+                      );
+                      
+        allow delete: if isAdmin() || request.auth.uid == resource.data.senderId;
       }
     }
   }

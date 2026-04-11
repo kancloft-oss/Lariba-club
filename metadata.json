@@ -1,5 +1,5 @@
 {
   "name": "Laribaclub",
   "description": "A community management platform for Laribaclub residents, featuring tariff management, event calendars, code tracking, and guild rankings.",
-  "requestFramePermissions": []
+  "requestFramePermissions": ["microphone"]
 }

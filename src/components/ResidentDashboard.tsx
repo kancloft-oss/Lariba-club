@@ -1,15 +1,16 @@
 import { useState } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { LogOut, Home, Calendar, CheckSquare, Shield } from 'lucide-react';
+import { LogOut, Home, Calendar, CheckSquare, Shield, MessageSquare } from 'lucide-react';
 import ResidentHome from './resident/ResidentHome';
 import ResidentEvents from './resident/ResidentEvents';
 import ResidentTracker from './resident/ResidentTracker';
 import ResidentGuild from './resident/ResidentGuild';
+import ChatLayout from './chat/ChatLayout';
 import { TariffBadge } from './TariffBadge';
 
 export default function ResidentDashboard() {
   const { userProfile, logout } = useAuth();
-  const [activeTab, setActiveTab] = useState<'home' | 'events' | 'tracker' | 'guild'>('home');
+  const [activeTab, setActiveTab] = useState<'home' | 'events' | 'tracker' | 'guild' | 'chat'>('home');
 
   const isRicher = userProfile?.tariff === 'Richer';
 
@@ -18,6 +19,7 @@ export default function ResidentDashboard() {
     { id: 'events', label: 'События', icon: Calendar },
     { id: 'tracker', label: 'Коды', icon: CheckSquare },
     ...(isRicher ? [{ id: 'guild', label: 'Гильдия', icon: Shield }] : []),
+    { id: 'chat', label: 'Чат', icon: MessageSquare },
   ] as const;
 
   return (
@@ -83,6 +85,7 @@ export default function ResidentDashboard() {
         {activeTab === 'events' && <ResidentEvents />}
         {activeTab === 'tracker' && <ResidentTracker />}
         {activeTab === 'guild' && isRicher && <ResidentGuild />}
+        {activeTab === 'chat' && <ChatLayout />}
       </div>
 
       {/* Mobile Bottom Nav */}

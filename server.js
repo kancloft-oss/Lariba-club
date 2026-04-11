@@ -82,6 +82,46 @@ async function startServer() {
     }
   });
 
+  app.post('/api/upload-chat-attachment', (req, res, next) => {
+    upload.single('attachment')(req, res, (err) => {
+      if (err) {
+        console.error('Multer error:', err);
+        return res.status(400).send(`Multer error: ${err.message}`);
+      }
+      next();
+    });
+  }, async (req, res) => {
+    if (!req.file) return res.status(400).send('No file uploaded.');
+
+    if (!process.env.S3_ACCESS_KEY || !process.env.S3_SECRET_KEY || !process.env.S3_BUCKET) {
+      console.error('S3 credentials or bucket missing in environment variables');
+      return res.status(500).send('S3 configuration missing');
+    }
+
+    const fileContent = req.file.buffer;
+    const key = `chat_attachments/${Date.now()}-${req.file.originalname.replace(/[^a-zA-Z0-9.]/g, '_')}`;
+    
+    const params = {
+      Bucket: process.env.S3_BUCKET,
+      Key: key,
+      Body: fileContent,
+      ContentType: req.file.mimetype,
+    };
+
+    try {
+      await s3Client.send(new PutObjectCommand(params));
+      
+      const endpoint = process.env.S3_ENDPOINT || 'https://s3.twcstorage.ru';
+      const bucket = process.env.S3_BUCKET;
+      const fileUrl = `${endpoint}/${bucket}/${key}`;
+      
+      res.json({ url: fileUrl });
+    } catch (error) {
+      console.error('S3 upload error details:', error);
+      res.status(500).send('Upload failed: ' + (error instanceof Error ? error.message : 'Unknown error'));
+    }
+  });
+
   app.get('/api/debug-s3', (req, res) => {
     res.json({
       endpoint: process.env.S3_ENDPOINT || 'https://s3.twcstorage.ru',
