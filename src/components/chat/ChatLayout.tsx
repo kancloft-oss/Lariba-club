@@ -15,38 +15,71 @@ export default function ChatLayout() {
   useEffect(() => {
     if (!userProfile) return;
 
-    // We need to fetch chats where the user is a participant, OR it's a tariff chat matching the user's tariff, OR user is admin
-    // Firestore OR queries are supported but might be complex. Let's fetch all chats and filter client-side for simplicity,
-    // OR use a composite query if possible. Since it's a small club, client-side filtering after a broad query might be okay,
-    // but let's try to be efficient.
-    
     const chatsRef = collection(db, 'chats');
-    
-    const unsubscribe = onSnapshot(query(chatsRef, orderBy('updatedAt', 'desc')), (snapshot) => {
-      const allChats = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Chat));
-      
-      const visibleChats = allChats.filter(chat => {
-        if (userProfile.role === 'admin') return true;
-        if (chat.type === 'tariff' && chat.tariff === userProfile.tariff) return true;
-        if ((chat.type === 'direct' || chat.type === 'group') && chat.participants?.includes(userProfile.uid)) return true;
-        return false;
-      });
+    let unsubscribes: (() => void)[] = [];
 
-      setChats(visibleChats);
-      
-      // Update selected chat if it was updated
-      if (selectedChat) {
-        const updatedSelected = visibleChats.find(c => c.id === selectedChat.id);
-        if (updatedSelected) {
-          setSelectedChat(updatedSelected);
+    const handleChatsUpdate = (snapshot: any, source: string) => {
+      // We will combine results from multiple queries
+      // For simplicity in this fix, we'll just re-fetch or manage state carefully.
+      // Actually, it's easier to use a single state update function.
+    };
+
+    if (userProfile.role === 'admin') {
+      const q = query(chatsRef, orderBy('updatedAt', 'desc'));
+      const unsub = onSnapshot(q, (snapshot) => {
+        const allChats = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Chat));
+        setChats(allChats);
+        if (selectedChat) {
+          const updatedSelected = allChats.find(c => c.id === selectedChat.id);
+          if (updatedSelected) setSelectedChat(updatedSelected);
         }
-      }
-    }, (error) => {
-      handleFirestoreError(error, OperationType.LIST, 'chats');
-    });
+      }, (error) => handleFirestoreError(error, OperationType.LIST, 'chats'));
+      unsubscribes.push(unsub);
+    } else {
+      // For residents, we need two queries:
+      // 1. Chats where they are a participant
+      // 2. Tariff chat for their tariff
+      
+      let participantChats: Chat[] = [];
+      let tariffChats: Chat[] = [];
 
-    return unsubscribe;
-  }, [userProfile, selectedChat]);
+      const updateCombinedChats = () => {
+        const combined = [...participantChats, ...tariffChats];
+        // Remove duplicates just in case, though unlikely
+        const unique = Array.from(new Map(combined.map(item => [item.id, item])).values());
+        // Sort by updatedAt desc
+        unique.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+        setChats(unique);
+        
+        if (selectedChat) {
+          const updatedSelected = unique.find(c => c.id === selectedChat.id);
+          if (updatedSelected) setSelectedChat(updatedSelected);
+        }
+      };
+
+      const qParticipants = query(chatsRef, where('participants', 'array-contains', userProfile.uid));
+      const unsubParticipants = onSnapshot(qParticipants, (snapshot) => {
+        participantChats = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Chat));
+        updateCombinedChats();
+      }, (error) => handleFirestoreError(error, OperationType.LIST, 'chats_participants'));
+      unsubscribes.push(unsubParticipants);
+
+      if (userProfile.tariff) {
+        const tariffChatRef = doc(db, 'chats', `tariff_${userProfile.tariff}`);
+        const unsubTariff = onSnapshot(tariffChatRef, (docSnap) => {
+          if (docSnap.exists()) {
+            tariffChats = [{ id: docSnap.id, ...docSnap.data() } as Chat];
+          } else {
+            tariffChats = [];
+          }
+          updateCombinedChats();
+        }, (error) => handleFirestoreError(error, OperationType.GET, `chats/tariff_${userProfile.tariff}`));
+        unsubscribes.push(unsubTariff);
+      }
+    }
+
+    return () => unsubscribes.forEach(unsub => unsub());
+  }, [userProfile, selectedChat?.id]);
 
   // Bootstrap tariff chats if admin
   useEffect(() => {

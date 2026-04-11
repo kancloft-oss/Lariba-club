@@ -94,8 +94,8 @@ service cloud.firestore {
     function isChatParticipant(chatData) {
       return isAuthenticated() && (
         isAdmin() ||
-        (chatData.type == 'tariff' && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.tariff == chatData.tariff) ||
-        (chatData.type in ['direct', 'group'] && request.auth.uid in chatData.participants)
+        (chatData.type == 'tariff' && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('tariff', '') == chatData.tariff) ||
+        (request.auth.uid in chatData.get('participants', []))
       );
     }
 
@@ -212,7 +212,7 @@ service cloud.firestore {
     }
 
     match /chats/{chatId} {
-      allow read: if isChatParticipant(resource.data);
+      allow read: if resource == null || isChatParticipant(resource.data);
       
       allow create: if isAuthenticated() && isValidChat(request.resource.data) && (
         isAdmin() || 
